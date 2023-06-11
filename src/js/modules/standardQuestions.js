@@ -5,15 +5,12 @@ import quetionAdd from "../services/quetionAdd";
 // const db = require("../assets/db.json")
 const standardQuestions = (element, selectorCit = 'standart',key, openAll=false, arlistLength)=>{
 
- 
       let div = document.createElement('div');
       div.classList.add('tinRightIn');
       //${'quetion'+key === 'quetion1'? 'q':'hide' }
       div.innerHTML = `
       <div class="wrapper ${selectorCit}question${key}">
-      <div style="
-      margin: 10px 0px 20px 0px;
-          ">
+      <div class="wrapper_wrap">
           <div class="row" style="
           display: flex;
           flex-direction: column;
@@ -28,12 +25,19 @@ const standardQuestions = (element, selectorCit = 'standart',key, openAll=false,
                 </p> 
               </div>
               <div class="wrap-button">
-                
-              <audio controls class="audio aud" controlslist=" nodownload noremoteplayback "  style="width:100%;max-width:284px;" id="aud${key}">
-               <source src="${element[2]? element[2]:'assets/voise/samCh.mp3'}" type="audio/mp3">
-               <p>Ваш браузер не поддерживает аудио HTML5. Вот 
-               <a href="assets/voise/samCh.mp3">ссылка на аудио</a>.</p>
-             </audio>
+                <div class="controls_one">
+                <div class="player-controls__item -xl js-play">
+                  <div class="icon_control_voise">
+                    <i id="voise_aa${key}"class="audio_play">
+                    </i>
+                  </div>
+                </div>
+                <div class="progress__bar progress__bar${key}">
+                  <div class="progress__current progress__current${key}" style="width: 0%;">
+                  </div>
+                </div>
+              </div>
+
              <button class="btn-remove btn btn-remove${key}">
              <img class="icon" src="assets/img/cors.png" alt="remove">
              </button>
@@ -44,7 +48,7 @@ const standardQuestions = (element, selectorCit = 'standart',key, openAll=false,
              <button class="btn-remove btn pause pause${key}">
              <img class="icon" src="assets/img/mute.png" alt="stop">
              </button>
-             ${window.mobaleMOde && !openAll?` 
+             ${global.mobaleMOde && !openAll?` 
              <div>
              <button class="stateBtn stateBtn${key} crossBut" style="
              margin: 15px 12px 0px 33px;
@@ -55,7 +59,7 @@ const standardQuestions = (element, selectorCit = 'standart',key, openAll=false,
             
            </div>
              
-           <textarea class="lasss lasss${key}" style="min-height: 225px;">
+           <textarea class="lasss lasss${key}" >
            </textarea>
         
           </div>
@@ -80,16 +84,27 @@ const standardQuestions = (element, selectorCit = 'standart',key, openAll=false,
       
             // console.log(document.querySelector('.lasss').value);
       timer = setTimeout(() => {
-        app('.start-stop' + key,
-            '.pause'+key,
-            '.btn-remove'+key,
-            '.lasss' + key,
-            '#aud'+key,
+        app(key,
+            '.start-stop' + key,
             selectorCit+'question'+key,
-            '#btnResp'+ key,
-            '#voisIconi'+key,
+            selectorCit+'question',
             openAll,
-            key); 
+            element[2]
+            ); 
+
+        // app('.start-stop' + key,
+        //     '.pause'+key,
+        //     '.btn-remove'+key,
+        //     '.lasss' + key,
+        //     '#aud'+key,
+        //     selectorCit+'question'+key,
+        //     '#btnResp'+ key,
+        //     '#voisIconi'+key,
+        //     openAll,
+        //     '.progress__current'+key,
+        //     '#voise_aa'+key,
+        //     element[2],
+        //     '.progress__bar'+key); 
 
 
             if(openAll) return
@@ -107,13 +122,13 @@ const standardQuestions = (element, selectorCit = 'standart',key, openAll=false,
                 let rand = Math.random()*array.length | 0;
                 let rValue = array[rand];
                 return rValue;
-            }
+                } 
             // var myArray = ['one', 'two', 'three', 'four', 'five', 'six'];
             // console.log(rValue)
             // анимаию сюда animation: 1s swashIn ease;
-            let arr = ['vanishIn', 'swashInp', 'holeOut', 'swashOut', 'spaceOutRight']
+            let arr = ['vanishIn', 'swashInp',  'swashOut', 'spaceOutRight']
             let rValue = RandArray(arr);
-              console.log(rValue);
+              // console.log(rValue);
               stateBtnkey.classList.add(rValue);
               // console.dir(stateBtnkey);
               stateBtnkey.onanimationend = function () {
@@ -121,7 +136,7 @@ const standardQuestions = (element, selectorCit = 'standart',key, openAll=false,
                 stateBtnkey.parentElement.parentElement.children[4].remove();
 
               }
-              let timer1
+              // let timer1
               // timer1 =  setTimeout(() => {
               //   stateBtnkey.parentElement.parentElement.children[4].remove();
               //   //уборка
@@ -146,4 +161,27 @@ const standardQuestions = (element, selectorCit = 'standart',key, openAll=false,
 }
 
 export default standardQuestions
+
+/*
+ <div class="controls_one">
+                <div class="player-controls__item -xl js-play">
+                <svg class="icon_control_voise">
+                <use id="voise_aa${key}" xlink:href="i.svg#icon_play"></use></svg></div>
+                <div class="progress__bar">
+                  <div class="progress__current" style="width: 0%;">
+                  </div>
+                </div>
+              </div>
+
+
+
+   
+              <audio controls class="audio aud"   style="width:100%;max-width:284px;" id="aud${key}">
+               <source src="${element[2]? element[2]:'assets/voise/samCh.mp3'}" type="audio/mp3">
+               <p>Ваш браузер не поддерживает аудио HTML5. Вот 
+               <a href="assets/voise/samCh.mp3">ссылка на аудио</a>.</p>
+             </audio>
+*/
+
+
 

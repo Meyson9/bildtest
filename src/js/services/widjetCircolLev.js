@@ -20,19 +20,19 @@ const widjetCircolLev = (sel) => {
     if(document.querySelector('.tinRightIn')) {
       switch (selector+'question') {
         case 'tickquestion':
-          console.log('tickquestion 1');
+          // console.log('tickquestion 1');
           portDB('tickquestion',true);
           break;
         case 'crossquestion':
-          console.log('crossquestion 2');
+          // console.log('crossquestion 2');
           portDB('crossquestion',true);
           break;
         case 'heartquestion':
-          console.log('heartquestion 3');
+          // console.log('heartquestion 3');
           portDB('heartquestion',true);
           break;
         case 'flowerquestion':
-          console.log('flowerquestion 4');
+          // console.log('flowerquestion 4');
           portDB('flowerquestion',true);
           break;               
           }
@@ -70,7 +70,7 @@ const widjetCircolLev = (sel) => {
 }
       
 
-    
+
     // 2 / 10 * 100 = 2
     function name() {
 

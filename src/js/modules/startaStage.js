@@ -1,100 +1,88 @@
-// import standardQuestions from "./standardQuestions"; 
 import quetionAdd from "../services/quetionAdd";
-// import db from "../db/db.json"
-// import dbArr from "../db/dbArr.json"
 import openAllQuestion from "./openAllQuestion";
 import whereStay from "./whereStay";
-// import togallVois from "./togallVois";
 import lostMicrophone from "./lostMicrophone";
 import widjetCircolLev from "../services/widjetCircolLev";
-import { stopVoiseLisenerAll,createElementMobaile } from "../services/LitlModules";
-// import elemScroll from "../services/elemScroll";
-
+import { stopVoiseLisenerAll,createElementMobaile, removeLocalStoregeQuestion } from "../services/LitlModules";
+import burgerMenu from "../services/burgerMenuFunction";
+import clickIphone from "../services/clickIphone";
 
 const startaStage = () =>{
   const btnsStart = document.querySelectorAll('.button'),
         wrapperTutle =  document.querySelector('.wrapperTutle'),
-        buttonHolder =document.querySelector('.buttonHolder');
-
-  // const body = document.body,
-  //       html = document.documentElement;
+        buttonHolder =document.querySelector('.buttonHolder'),
+        body = document.body,
+        html = document.documentElement;
         
   let selectorListQ = [];
-
-    // let height = Math.max( body.scrollHeight, body.offsetHeight, 
-    //                     html.clientHeight, html.scrollHeight, html.offsetHeight );
-
-   
-// console.log(height);
   btnsStart.forEach((item)=> {
-
     item.addEventListener('click', (e)=>{
       selectorListQ = [];
-      console.log(e);
-     let targetBtn = e.target;
-     window.modeloderad = false;
+      // console.log(e);
+     let targetBtn = e.target,
+         time,
+         navel = document.querySelector('#navel'),
+         burger_men = document.querySelector('#burger_men'),
+         btnBurge_men = document.querySelector('#btnBurge_men'),
+         spanBurger_man = document.querySelector('#spanBurger_man'),
+         overlowBurger = document.querySelector('#overlowBurger'),
+         sel = 'tick',
+         localSel = targetBtn.classList[2],
+         width = Math.max( body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth ),
+         btn = document.querySelector('.staet');
 
-     const todoNumOne = document.querySelector('.tinRightIn');
-     if(!todoNumOne){
+     
+     window.modeloderad = false;
+     
+     if(document.querySelector('#navel').parentElement ==  document.querySelector('.time__segment') ){
+        document.querySelector('#burger_men').appendChild(document.querySelector('#navel'))
+     }
+
+    //  const todoNumOne = document.querySelector('.tinRightIn');
+     if(!document.querySelector('.tinRightIn')){
        wrapperTutle.classList.add('pps');
      }
-    let time;
-    time = setTimeout(() => {
+    //  let time;
+     time = setTimeout(() => {
+            buttonHolder.classList.remove('hide');
+            btnsStart.forEach(span=> {
+            span.nextElementSibling.classList.remove('textActiveLevel');
+            });
+            targetBtn.nextElementSibling.classList.add('textActiveLevel');
+            clearTimeout(time);
+            time = null;
+      }, 100);
 
-          buttonHolder.classList.remove('hide');
-          btnsStart.forEach(span=> {
-          span.nextElementSibling.classList.remove('textActiveLevel');
-          });
-          targetBtn.nextElementSibling.classList.add('textActiveLevel');
-          clearTimeout(time);
-          time = null;
-        }, 100);
-
-        let navel = document.querySelector('#navel'),
-            burger_men = document.querySelector('#burger_men'),
-            btnBurge_men = document.querySelector('#btnBurge_men'),
-            spanBurger_man = document.querySelector('#spanBurger_man'),
-            overlowBurger = document.querySelector('#overlowBurger');
-
-            let sel = 'tick',
-            localSel = targetBtn.classList[2];
-            selectorListQ = [];
-        switch (targetBtn.classList[2]) {
-          case 'tick':
-            selectorListQ = window.objectAllCor[localSel];    
-            sel = 'tick';
-            break;
-          case 'cross':
-             selectorListQ = window.objectAllCor[localSel];
-            sel = 'cross';
-            break;
-          case 'heart':
-             selectorListQ = window.objectAllCor[localSel];
-            sel = 'heart';
-            break;
-          case 'flower':
-          // selectorListQ = dbArr['styles'][3];
-           selectorListQ = window.objectAllCor[localSel];
-          sel = 'flower'
-            break;
-
-        }
+            // selectorListQ = [];
+            switch (targetBtn.classList[2]) {
+              case 'tick':
+                selectorListQ = window.objectAllCor[localSel];    
+                sel = 'tick';
+                break;
+              case 'cross':
+                selectorListQ = window.objectAllCor[localSel];
+                sel = 'cross';
+                break;
+              case 'heart':
+                selectorListQ = window.objectAllCor[localSel];
+                sel = 'heart';
+                break;
+              case 'flower':
+                selectorListQ = window.objectAllCor[localSel];
+                sel = 'flower'
+                break;
+            }
         localSel= null;
-        // selectorListQ = selectorListQ.length;
-        let btn = document.querySelector('.staet')
-  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  // if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && width <= 775) {
+  if (global.mobaleMOde && width <= 775) {
     // //         // код для мобильных устройств
-    if(!btn.classList.contains('hide')){
-      btn.classList.add('hide');
-    }
-          // document.querySelector('.staet').classList.add('hide');
-
-          window.mobaleMOde = true;
+    // if(!btn.classList.contains('hide')){
+    //   btn.classList.add('hide');
+    // }
           if(navel.classList.contains('burger-menu_nav')){
         // бесполезная строка по моим предполоениям
-            let menu = document.querySelector('.burger-menu');
-
-            menu.classList.remove('burger-menu_active');
+            // let menu = document.querySelector('.burger-menu');
+            document.querySelector('.burger-menu').classList.remove('burger-menu_active');
           } else {
             navel.classList.add('burger-menu_nav');
             burger_men.classList.add('burger-menu');
@@ -112,67 +100,9 @@ const startaStage = () =>{
           // whereStay(document.querySelector('.wher'));
           // togallVois(true);
           lostMicrophone(true);
-          console.log('код для мобильных устройств 180');
-          
 
-          document.querySelector('.gp_segment').addEventListener('click',clickIphone,{once:true})
-            
-          function  clickIphone() {
-            // createElement('.wraperAllToll')
-            // alert('----11');
-            
-            let  count = 0,
-            lengthIteration = 10,
-            element = document.querySelector('.modals_forms'),
-            index = document.querySelectorAll('.tinRightIn').length !== 0?document.querySelectorAll('.tinRightIn').length : 0;
-            // index = 0;
-            element.classList.add('showModal')
-            
-            chicle();
-           
-                  function chicle() {
-                    if (lengthIteration >= selectorListQ) {
-                      lengthIteration = selectorListQ;
-                    }
-
-                    for ( index ; index < lengthIteration; index++) {
-                      count++;
-                      // console.log(`${count} : ${selectorListQ}`);
-                      // console.log(`${index}  == ${selectorListQ -1}`);
-                      quetionAdd(false,false,false,true);
-
-                      if(index  == selectorListQ -2){ 
-                         document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({block: "start", behavior: "smooth"});
-                          element.classList.remove('showModal');
-                       }
-                    }
-
-                    lengthIteration += 20;
-                    
-                    index = count
-                    
-                    if(count  >= selectorListQ ){
-                      count = 0,
-                      lengthIteration = 30,
-                      index = 0
-                      return;
-                    }else {
-                      // console.log('мы тут вызываем');
-
-                     let time3 = setTimeout(() => {
-                        chicle();
-                        clearTimeout(time3);
-                        time3 = null;
-                      }, 1500);
-                    }
-                  }
-
-                 
-                }
-            
-
+          document.querySelector('.gp_segment').addEventListener('click',()=>{clickIphone(selectorListQ)},{once:true});
   } else {
-          window.mobaleMOde = false;
           if(btn.classList.contains('hide')){
             btn.classList.remove('hide');
           }
@@ -199,69 +129,13 @@ const startaStage = () =>{
           buttonHolder.classList.add('gridAct');
         }
 
-      // }, 300);
-      
-     
-      // selectorListQ ? console.log('не пуст') : console.log("пуст");
-
-      // clearLocalStoreg();
-      (function () {
-        for(let [key] of Object.entries(localStorage)) {
-          let selectorQuestionLevel =  key.search(/(tick|cross|heart|flower)(question)/);
-          
-          if (selectorQuestionLevel === 0) {
-            localStorage.removeItem(key);
-          }
-          selectorQuestionLevel = null;
-        }
-      }());
-      // clearLocalStoreg();
-      // function clearLocalStoreg() {
-      //   for(let [key] of Object.entries(localStorage)) {
-      //     let selectorQuestionLevel =  key.search(/(tick|cross|heart|flower)(question)/);
-          
-      //     if (selectorQuestionLevel === 0) {
-      //       localStorage.removeItem(key);
-      //     }
-      //     selectorQuestionLevel  = null;
-      //   }
-      // }
-      // document.querySelector('#pizda')/addEventListener('click', clearListener);
-      // function clearListener() {
-      //   let elem = document.querySelectorAll('.tinRightIn');
-      //   for (let index = 0; index < elem.length; index++) {
-      //     const element = elem[index];
-          
-      //     element.children[0].children[1].children[0].removeEventListener('click',window.res[0]);
-      //     element.children[0].children[0].children[0].children[1].children[1].removeEventListener('click',window.res[1]);
-      //     element.children[0].children[0].children[0].children[1].children[2].removeEventListener('click',window.res[2]);
-      //     element.children[0].children[0].children[0].children[1].children[3].removeEventListener('click',window.res[3]);
-      //     element.children[0].children[0].children[0].children[2].removeEventListener('click',window.res[4]);
-      //       // element.remove();
-           
-      //     }
-      //     elem = null;
-      // }
+        removeLocalStoregeQuestion();
+    
 
      let time4 = setTimeout(() => {
-        let list = document.querySelector('.wrapperPagestart');
-        
-        let elem = document.querySelectorAll('.tinRightIn');
+        let list = document.querySelector('.wrapperPagestart'),
+            elem = document.querySelectorAll('.tinRightIn');
         if(elem){
-          // console.log('true list ===_');
-          // stopVoiseLisenerAll();
-          // при смене уровня сложности меняет на стандартную высоту страницы 
-          // for (let index = 0; index < elem.length; index++) {
-          //   const element = elem[index];
-            
-          //   element.children[0].children[1].children[0].removeEventListener('click',window.res[0]);
-          //   element.children[0].children[0].children[0].children[1].children[1].removeEventListener('click',window.res[1]);
-          //   element.children[0].children[0].children[0].children[1].children[2].removeEventListener('click',window.res[2]);
-          //   element.children[0].children[0].children[0].children[1].children[3].removeEventListener('click',window.res[3]);
-          //   element.children[0].children[0].children[0].children[2].removeEventListener('click',window.res[4]);
-          //     // element.remove();
-             
-          //   }
             elem = null;
 
           list.replaceChildren();
@@ -270,72 +144,19 @@ const startaStage = () =>{
 
         localStorage.setItem('sel',sel);
      
-
-        window.selFoOpenAllquestion = sel;
+        // window.selFoOpenAllquestion = sel;
 
         quetionAdd(false,sel);
 
         if(document.querySelector('[data-span2]')){
           document.querySelector('[data-span2]').classList.remove('opal');
         }
-        widjetCircolLev(sel)
+        widjetCircolLev(sel);
         clearTimeout(time4);
         time4 = null;
       }, 800);  
     })
   })
   
-
-
-
-
-  
-  function burgerMenu(selector) {
-    let menu = document.querySelector(selector);
-
-    let button = document.querySelector('.burger-menu_button');
-    let butto1 = document.querySelector('.burger-menu_lines');
-    let links = document.querySelector('.burger-menu_link');
-    let overlay = document.querySelector('.burger-menu_overlay');
-    
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      toggleMenu();
-    });
-    butto1.addEventListener('click', (e) => {
-      e.preventDefault();
-      toggleMenu();
-    menu.classList.contains('losharablt');
-      if (menu.classList.contains('burger-menu_active')) {
-        menu.classList.remove('burger-menu_active')
-        
-      } else {
-        menu.classList.add('burger-menu_active');
-        
-      }
-    });
-    
-    overlay.addEventListener('click', () => toggleMenu());
-    
-    function toggleMenu(){
-      const spaner = document.querySelector('[data-span2]') ;
-      if(menu.classList.contains('burger-menu_active')){
-        menu.classList.remove('burger-menu_active');
-        spaner.classList.remove('opal');
-        // document.querySelector('.burger-menu_lines').style = 'opacity: 1;'
-      } else {
-        // document.querySelector('.burger-menu_lines').style = 'opacity: 0;'
-        menu.classList.add('burger-menu_active');
-        spaner.classList.add('opal');
-
-      }
-      
-      // if (menu.classList.contains('burger-menu_active')) {
-      //   document.querySelector('body').style='overlow= hidden';
-      // } else {
-      //   document.querySelector('body').style='overlow= visible';
-      // }
-    }
-  }
 }
 export default startaStage

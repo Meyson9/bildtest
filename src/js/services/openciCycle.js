@@ -34,7 +34,7 @@ const openciCycle = (localSel) => {
     // console.log(selectorListQ);
     
     if(index == selectorListQ-1) {
-      console.log('true');
+      // console.log('true');
       quetionAdd(false,false,false,false);
 
     } else {

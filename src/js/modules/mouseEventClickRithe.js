@@ -1,3 +1,5 @@
+import widjetCircolLev from "../services/widjetCircolLev";
+import { removeLocalStoregeQuestion } from "../services/LitlModules";
 const mouseEventClickRithe = () => {
     document.querySelector('#standatrQuetion').oncontextmenu = function (event) {
 		return menu(1, event);	
@@ -35,9 +37,9 @@ function menu(type, evt) {
   // Показываем собственное контекстное меню
   var menu = document.getElementById("contextMenuId");
   var html = "";
-  html = "Меню для удаления ответов";
-  html += "<br><a id='delOne' href='#'>Удлаить эту секцию</a>";
-  html += "<br><a id='All' ' href='#'>Удалить все ответы</a>";
+  html = "Меню для удаления ответов:";
+  html += "<br><hr><a id='delOne' class='contextItem' href='#'>Удлаить эту секцию</a>";
+  html += "<br><a id='All' class='contextItem' href='#'>Удалить все ответы</a>";
 
 
 //  
@@ -56,6 +58,7 @@ const collection = {
 	for (const key in collection) {
 			 collection[key]();
 	}
+
   }
 
 
@@ -64,8 +67,15 @@ const collection = {
 
 	const transaction = db.transaction([params],"readwrite");
 	const store = transaction.objectStore(params);
-	const p = store.clear();
-
+	// const p =
+	 store.clear();
+	 removeLocalStoregeQuestion();
+	if(document.querySelector('.lasss')) {
+		document.querySelectorAll('.lasss').forEach(item=> {
+			item.value = '';
+		})
+	}
+	widjetCircolLev();
   }
 
   // Если есть что показать - показываем
@@ -89,7 +99,7 @@ function addHandler(object, event, handler, useCapture) {
 	  object.addEventListener(event, handler, useCapture ? useCapture : false);
   } else if (object.attachEvent) {
 	  object.attachEvent('on' + event, handler);
-  } else alert("Add handler is not supported");
+  } else console.log("Add handler is not supported");
 }
 addHandler(document, "contextmenu", function() {
   document.getElementById("contextMenuId").style.display = "none";

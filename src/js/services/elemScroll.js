@@ -1,5 +1,5 @@
 const elemScroll = (selector) => {
-  console.log(selector);
+  // console.log(selector);
   let element = document.querySelector(`.${selector}`);
       
       // body.style.height = body.offsetHeight +350+"px";

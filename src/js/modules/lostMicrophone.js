@@ -8,7 +8,8 @@ btnLostMicrophone.addEventListener('click', (e)=> {
   let activeMicrapone = localStorage.getItem('WhereStayUser'), 
       p = document.querySelector("."+activeMicrapone);
   if(!p) return console.log('тут пусто! Ты аухел ? в квадрате');
-  if(!p.children[0].classList.contains('iconActive')) return console.log('тут пусто! Ты аухел ? в кубе!');
+  // console.log(p);
+  // if(!p.children[0].classList.contains('iconActive')) return console.log('тут пусто! Ты аухел ? в кубе!');
 
   p.scrollIntoView({block: "center", behavior: "smooth"})
   // list = null;

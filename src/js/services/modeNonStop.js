@@ -29,15 +29,15 @@ const modeNonStop = (btnStartVoise,letstop,selPahtVoid,openAll) => {
   
        stopVoiseLisenerAll();
   
-       vois.onended = function() {
-        let time = setTimeout(() => {
+      //  vois.onended = function() {
+      //   let time = setTimeout(() => {
           
-            btnStartVoise.click(); 
+      //       btnStartVoise.click(); 
   
-            clearTimeout(time);
-            time = null
-          }, 700);
-        };
+      //       clearTimeout(time);
+      //       time = null
+      //     }, 700);
+      //   };
   
         
       vois = null;

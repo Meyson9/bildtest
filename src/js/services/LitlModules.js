@@ -2,6 +2,14 @@
 function stopVoiseLisenerAll() {
   document.querySelectorAll('.pause').forEach(item => item.click());
 }
+function removeAttributNadClass() {
+  document.querySelectorAll('.start-stop').forEach((item)=>{
+    item.classList.remove('btnDeactiv') 
+
+    item.removeAttribute('disabled' ) 
+  }) 
+}
+
 function stopVoiseSpeecAll() {
   let al = document.querySelectorAll('audio');
   for(let i = 0; i < al.length;i++){
@@ -135,7 +143,16 @@ function openTextUserError(idPopap,text = 'Упс, что-то пошло не �
   }, timeout);
  }
 // item.pause()
-
-export {stopVoiseLisenerAll,stopVoiseSpeecAll,createElementMobaile,openTextUserError}
+function removeLocalStoregeQuestion() {
+  for(let [key] of Object.entries(localStorage)) {
+    let selectorQuestionLevel =  key.search(/(tick|cross|heart|flower)(question)/);
+    
+    if (selectorQuestionLevel === 0) {
+      localStorage.removeItem(key);
+    }
+    selectorQuestionLevel = null;
+  }
+}
+export {stopVoiseLisenerAll,stopVoiseSpeecAll,createElementMobaile,openTextUserError,removeAttributNadClass,removeLocalStoregeQuestion}
 
 

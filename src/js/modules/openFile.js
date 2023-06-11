@@ -61,11 +61,12 @@ function openFile(db, openRequest) {
 function lllll() {
   
   const div = document.createElement('div');
+  div.id = "myModal"
+  div.classList.add('modal');
   div.innerHTML = `
-  <div id="myModal" class="modal">
     <span class="clouse">×</span>
     <div class="modal_slid_contnt">
-    <p style="font-size: 25px; padding: 0px 0px 21px 0px;"
+    <p style="font-size: 21px; padding: 0px 0px 21px 0px;"
     >Ваши ответы исчезнут! Продолжаем ?</p>
       <div style="
         display: flex;
@@ -75,7 +76,6 @@ function lllll() {
         <button id="BtnNoo" class="btnFile">Нет</button> 
       </div>
     </div>
-  </div>
   `
   document.querySelector('body').append(div)
 
@@ -88,17 +88,31 @@ function lllll() {
         const yes = () =>  {
           input.click()
           btnYes.removeEventListener('click', yes);
+          btnNoo.removeEventListener('click', noo);
+          clouse.removeEventListener('click', noo);
+          document.removeEventListener('keydown',keydownFunct );
           document.querySelector('#myModal').remove()
         };
         const noo = () => {
-          document.querySelector('#myModal').remove()
+          btnYes.removeEventListener('click', yes);
           btnNoo.removeEventListener('click', noo);
           clouse.removeEventListener('click', noo);
+          document.removeEventListener('keydown',keydownFunct );
+          document.querySelector('#myModal').remove()
+
         };
+       const keydownFunct = (e)=> {
+          if (e.code === 'Escape') {
+            noo();
+          }
+
+      }
        
         btnYes.addEventListener('click', yes)
         btnNoo.addEventListener('click', noo)
         clouse.addEventListener('click', noo)
+        clouse.addEventListener('click', noo)
+        document.addEventListener('keydown',keydownFunct );
 }
     const chaengeHend = (event)=> {
 

@@ -8,9 +8,10 @@
     <link rel="stylesheet" href="./assets/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="index,follow" />
+    <meta name="theme-color" content="#d8d8d8">
     <!-- Обязательный (и достаточный) тег для браузеров --> 
     <link type="image/x-icon" rel="shortcut icon" href="favicon.ico">
-
+    <link rel="manifest" href="./manifest.json">
     <!-- Дополнительные иконки для десктопных браузеров -->
     <link type="image/png" sizes="16x16" rel="icon" href="./assets/icon/favicon-16x16.png">
     <link type="image/png" sizes="32x32" rel="icon" href="./assets/icon/favicon-32x32.png">
@@ -40,7 +41,7 @@
 
     <title>Вопрсы на собеседовании тестировщиков: для Junior, Middle и Senior QA-инженеров</title>
     <meta name="keywords" content="вопросы на собеседовании тестировщика, тестировщик, собеседование тестировщика, задание на собеседовании тестировщика" />
-    <meta name="description" content="Интервью тестировщика, какие вопросы задают на собеседовании тестировщикам? Логические задачи и ответы Qa engineer! Динамические тесты для инженер по тестированию " />
+    <meta name="description" content="Интервью тестировщика, какие вопросы задают на собеседовании тестировщикам? Логические задачи и ответы Qa engineer! Динамические тесты для инженер по тестированию" />
     
     <!-- Yandex.Metrika counter -->
 <!-- <script type="text/javascript" >
@@ -65,110 +66,127 @@
   <body>
     <!-- <button id="pizda" style="position: fixed;;">нажми сюда блять</button> -->
     <div class="wraperAllToll">
-      <div class="segment">
-        <!-- <button class="unit" type="button"><i class="icon ion-md-arrow-back"></i></button> -->
-        <!-- <button class="unit" type="button"><i class="icon ion-md-bookmark"></i></button> -->
-        <button class="unit" id="burgerBtn" type="button"><i class="icon ion-md-settings"></i></button>
-        <div class="downloadedBtn hide" data-togle="clouse">
-          <button class="btnFile" id="ifadsBtn">Экспорт<i class="fas fa-download"></i></button>
-          <a id="ifads" >
-          </a>
-          <button class="btnFile" id="openFileBtn">Импорт</button>
-          <input type="file" id="inputFile" accept=".json"  onclick="" >
-        </div>
-      </div>
-      <div class="wrapperTutle">
-        <header> 
-          <h1 style="font-size: 1.4em;">
-            Вопросы на собеседовании QA engineer
-          </h1>
-        </header>
-      </div>
-      <!-- <nav class="burger-menu_nav"> -->
+
+      
+
+      <aside class="sidbar_left">
         <div id="burger_men">
-          <a id="btnBurge_men" href="" >
+          <a id="btnBurge_men" href="#" >
             <spun id="spanBurger_man" data-span2></spun>
           </a>
-
-          <nav id="navel">
-            <div class="buttonHolder">
-              <ul class="nav">
-                  <li>
-                    <a id="standatrQuetion" href="#" class="button startPage tick">
-                      <span class="icon-home tick"></span>
-                    </a>
-                    <span class="sp">Стандартные</span>
-                  </li>
-                  <li>
-                    <a id="juniorQuetion" href="#" class="button startPage cross">
-                      <span class="icon-cog cross"></span>
-                      <!-- <span class="screen-reader-text">Settings</span> -->
-                    </a>
-                    <span class="sp">Junior</span>
-                  </li>
-                  <li>
-                    <a id="midleQuetion"  href="#" class="button startPage heart">
-                      <span class="icon-cw heart"></span>
-                      <!-- <span class="screen-reader-text">Refresh</span> -->
-                    </a>
-                    <span class="sp">Midle</span>
-                  </li>
-                  <li>
-                    <a id="seniorQuetion"  href="#" class="button startPage flower">
-                      <span class="icon-location flower"></span>
-                      <!-- <span class="screen-reader-text">Location</span> -->
-                    </a>
-                    <span class="sp">Senior</span>
-                  </li>
-              </ul>
-              <div id="overlowBurger" ></div>
-            </div>
-        </nav>
         </div> 
-      <div class="staet">
-        <div class="fab">
-          <ul class="fab-buttons">
-            <li class="fab-buttons__item">
-              <div  class="fab-buttons__link" data-tooltip="Найти актив...">
-                <i class="icon-material icon-material_fb"></i>
+      </aside>
+      
+      <main class="main">
+        <section class="main__conteiner">
+          <header> 
+              <div class="wrapperTutle">
+                <h1 style="font-size: 1.4em;">
+                    Вопросы на собеседовании QA engineer
+                </h1>
               </div>
-            </li>
-            <li class="fab-buttons__item">
-              <div  id="non_stop_mode" class="fab-buttons__link" data-tooltip="Нон-стопом">
-                <i id="non_stop_mode_icon" class="icon-material icon-material_tw"></i>
+          </header>
+          <section class="time__segment">
+            <nav id="navel">
+              <div class="buttonHolder">
+                <ul class="nav">
+                    <li>
+                      <a id="standatrQuetion" href="#" class="button startPage tick">
+                        <span class="icon-home tick"></span>
+                      </a>
+                      <span class="sp">Стандартные</span>
+                    </li>
+                    <li>
+                      <a id="juniorQuetion" href="#" class="button startPage cross">
+                        <span class="icon-cog cross"></span>
+                      </a>
+                      <span class="sp">Junior</span>
+                    </li>
+                    <li>
+                      <a id="midleQuetion"  href="#" class="button startPage heart">
+                        <span class="icon-cw heart"></span>
+                      </a>
+                      <span class="sp">Midle</span>
+                    </li>
+                    <li>
+                      <a id="seniorQuetion"  href="#" class="button startPage flower">
+                        <span class="icon-location flower"></span>
+                      </a>
+                      <span class="sp">Senior</span>
+                    </li>
+                </ul>
+                <div id="overlowBurger" ></div>
               </div>
-            </li>
-            <li class="fab-buttons__item">
-              <div  id="voise_mudte" class="fab-buttons__link" data-tooltip="Звук">
-                <i id="voise_mudte_icon" class="icon-material icon-material_li"></i>
-              </div>
-            </li>
-            <li class="fab-buttons__item">
-              <div  class="fab-buttons__link" data-tooltip="показать все">
-                <i class="icon-material icon-material_gp"></i>
-              </div>
-            </li>
-            <li class="fab-buttons__item">
-              <div id="wheryIsty" id="wheryIsty" class="fab-buttons__link" data-tooltip="где я был?">
-                <i class="icon-material icon-material_Wher"></i>
-              </div>
-            </li>
-          </ul>
-          <span class="fab-action-button">
-            <button class="stateBtn crossBut">
-              <!-- <i class="fab-action-button__icon"></i> -->
-<!-- <button class="trigger" for="trigger"></button> -->
-            </button>
-            <div class="dots">
-            <div id="dotPuls" class=""></div>
-  <!-- <div class="dot"></div>
-  <div class="dot"></div> -->
-            </div>
-          </span>
+          </nav>
+  
+          </section>
+          <section>
+            <div class="wrapperPagestart"></div>
+          </section>
+        </section>
+      </main>
+
+      <aside class="sidbar_rigte">
+        <section class="sidbar_rigte_section">
+
+
+        <div class="segment">
+          <button class="unit" id="burgerBtn" type="button"><i class="icon ion-md-settings"></i></button>
+          <div class="downloadedBtn hide" data-togle="clouse">
+            <button class="btnFile" id="ifadsBtn">Экспорт<i class="fas fa-download"></i></button>
+            <a id="ifads" href="#">
+            </a>
+            <button class="btnFile" id="openFileBtn">Импорт</button>
+            <input type="file" id="inputFile" accept=".json"  onclick="" >
+          </div>
         </div>
-      </div>
-      <div class="wrapperPagestart">
-      </div>
+        <div class="staet">
+          <div class="fab">
+            <ul class="fab-buttons">
+              <li class="fab-buttons__item">
+                <div  class="fab-buttons__link" data-tooltip="Найти актив...">
+                  <i class="icon-material icon-material_fb"></i>
+                </div>
+              </li>
+              <li class="fab-buttons__item">
+                <div  id="non_stop_mode" class="fab-buttons__link" data-tooltip="Нон-стопом">
+                  <i id="non_stop_mode_icon" class="icon-material icon-material_tw"></i>
+                </div>
+              </li>
+              <li class="fab-buttons__item">
+                <div  id="voise_mudte" class="fab-buttons__link" data-tooltip="Звук">
+                  <i id="voise_mudte_icon" class="icon-material icon-material_li"></i>
+                </div>
+              </li>
+              <li class="fab-buttons__item">
+                <div  class="fab-buttons__link" data-tooltip="показать все">
+                  <i class="icon-material icon-material_gp"></i>
+                </div>
+              </li>
+              <li class="fab-buttons__item">
+                <div id="wheryIsty" id="wheryIsty" class="fab-buttons__link" data-tooltip="где я был?">
+                  <i class="icon-material icon-material_Wher"></i>
+                </div>
+              </li>
+            </ul>
+            <span class="fab-action-button">
+              <button class="stateBtn crossBut">
+              </button>
+              <div class="dots">
+              <div id="dotPuls" class=""></div>
+                <!-- <div class="dot"></div>
+                <div class="dot"></div> -->
+              </div>
+            </span>
+          </div>
+        </div>
+      </section>
+      </aside>
+      <!-- <nav class="burger-menu_nav"> left saidbar -->
+
+        <!-- rite saidbar -->
+
+
     </div>
     <!-- </div> -->
     <div id="modalAll">
@@ -183,9 +201,9 @@
   </div>
   
 <!-- Контер для собственного контекстного меню. По умолчания - скрыт. -->
-<div id="contextMenuId" style="z-index: 99999999  ; position:absolute; top:0; left:0; border:1px solid #666; background-color:#CCC; display:none; float:left;">
+<div id="contextMenuId" class ="menuContext" style="display: none;">
 </div>
     <script src="script.js"></script>
-    
+ 
   </body>
   </html>

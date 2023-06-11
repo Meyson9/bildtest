@@ -1,54 +1,192 @@
 import multiPlepresButtons  from "../services/multiPlepresButtons";
 import chech  from "../services/chech";
-import automationSizeInput from "../services/automationSizeInput";
+// import automationSizeInput from "../services/automationSizeInput";
 // import voiceQuestion from "../services/voiceQuestion";
+// import buzz from "buzz";
 import elemScroll from "../services/elemScroll";
-import modeNonStop from "../services/modeNonStop";
-import { stopVoiseLisenerAll,stopVoiseSpeecAll, openTextUserError } from "../services/LitlModules";
+// import modeNonStop from "../services/modeNonStop";
+import { openTextUserError, removeAttributNadClass } from "../services/LitlModules";
+// import { stopVoiseLisenerAll,stopVoiseSpeecAll, openTextUserError } from "../services/LitlModules";
 import widjetCircolLev from "../services/widjetCircolLev";
-let count = 0
-/*
-multiPlepresButtons
-chech
-elemScroll
-modeNonStop
-widjetCircolLev
-*/
-const  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, selBtnResp,selVoisIcPuls,openAll,key) => {
- 
+// let count = 0
+// let  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, selBtnResp,selVoisIcPuls,openAll,key,viosId,viosPath = 'assets/voise/samCh.mp3',progress__bar) => {
+let mySound;
 
-
-
+let  app = (key, selStart,selLocal,selLocalRepl, openAll,viosPath = 'assets/voise/samCh.mp3') => {
   const recognizer = global.recog;
-
+  recognizer.stop();
   const params = {
     btnStartVoise : document.querySelector(selStart),
-    letstop : document.querySelector(selStop),
-    remove : document.querySelector(selRemove),
-    textare : document.querySelector(selTextare),
-    btnResp : document.querySelector(selBtnResp),
+    letstop : document.querySelector('.pause'+key),
+    remove : document.querySelector('.btn-remove'+key),
+    textare : document.querySelector('.lasss' + key,),
+    btnResp : document.querySelector('#btnResp'+ key),
     material_fb : document.querySelector('.icon-material_fb')
   };
+ let audio_button = document.querySelector('#voise_aa'+key),
+  curtiem;
+
+  mySound &&  pauseVid(mySound);
+  mySound = new Audio(viosPath);  
+
+
+    document.querySelector('.progress__bar'+key).addEventListener('click', setProgress);
+  function setProgress(e) {
+    const width = this.clientWidth,
+          clickX = e.offsetX,
+          duration = mySound.duration;
+    curtiem = (clickX / width) * duration;
+    mySound.currentTime = (clickX / width) * duration;
+  }
+
+  mySound.ontimeupdate = function(e) {myFunction(e)};
+  function myFunction(e) {
+    // console.log(e);
+    if(!document.querySelector('.progress__current'+key)) return
+      const { duration, currentTime } = e.srcElement,
+            progressPercent = (currentTime / duration) * 100;
+      document.querySelector('.progress__current'+key).style.width = `${progressPercent}%`;
+  }
+
+  function playVid(track) {
+   
+    // console.log(track.readyState);
+    // recognizer.stop();
+      track.play();
+
+  
+    track.onplay = function() {
+      // alert("The video has started to play");
+      audio_button.classList.remove('audio_play');
+      audio_button.classList.add('audio_pause');
+    };
+
+    track.onpause = function() {
+      curtiem = track.currentTime;
+    };
+    
+    track.onended  = function() {
+      // console.log("The audio has ended function axmedet");
+      audio_button.classList.remove('audio_pause');
+      audio_button.classList.add('audio_play');
+      track.currentTime,curtiem = 0;
+      let NoneStopMode = document.querySelector('#non_stop_mode_icon').classList.contains('icon-material_tw_NonStop'); 
+      if(NoneStopMode){
+        // recognizer.stop();
+        let time = setTimeout(() => {
+          startVoise();
+          clearTimeout(time);
+        }, 900);
+      }
+        };
+
+    track.ontimeupdate = function(e) {myFunction(e)};
+    // function myFunction(e) {
+    //   // console.log(e);
+    //   if(!document.querySelector(progress__current)) return
+    //     const { duration, currentTime } = e.srcElement;
+    //     const progressPercent = (currentTime / duration) * 100;
+    //     document.querySelector(progress__current).style.width = `${progressPercent}%`;
+    // }
+  }
+
+  function pauseVid(track) {
+    track.pause();
+    audio_button.classList.remove('audio_pause');
+    audio_button.classList.add('audio_play');
+    // console.log('вызвался');
+  }
+
+  
+  
+  // console.log(global.appleMode);
+  // mySound.play();
+  // if(/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+  if(global.appleMode) {
+        let b,i,c;
+       i = setInterval(() => {
+          if(localStorage.getItem('iphoneLocalVoise')) {
+            setListeerBtnPlay();
+            c = true
+            clearInterval(i);
+            clearTimeout(b);
+            i = null;
+            b = null;
+          }
+        }, 100);
+
+        mySound.onloadedmetadata = function() {
+          let b =  setTimeout(() => {
+            console.log('clear nau');  
+            // clearInterval(i);
+              if(c!==true) setListeerBtnPlay();
+
+            clearInterval(i);
+            clearTimeout(b);
+              i = null;
+              b = null;
+            }, (mySound.duration*1000));
+          };
+          
+          if (!openAll) {
+            let time = setTimeout(() => {
+              elemScroll(selLocal);
+
+              // очистка
+              clearTimeout(time);
+              time = null;
+            }, 700);
+          }
+
+      } else { // кроме apple
+
+        // !openAll && playVid(mySound);
+        setListeerBtnPlay();
+        if (!openAll) {
+          let btnVoiseMute = document.querySelector('#voise_mudte_icon').classList.contains('icon-material_li_mute');
+          if(!btnVoiseMute) {
+            recognizer.stop();
+            playVid(mySound);
+          } 
+          elemScroll(selLocal);
+        }
+      }
+
+  function setListeerBtnPlay() {        
+    audio_button.addEventListener('click', (e) =>{
+        e.preventDefault();
+        if (audio_button.classList.contains('audio_play')) {
+            mySound && mySound.pause();
+            mySound = new Audio(viosPath);
+            if(curtiem) {
+               mySound.currentTime = curtiem;
+               curtiem = null;
+            }
+            playVid(mySound);
+           } else {
+             pauseVid(mySound);
+           }
+      })
+    }
+
+
+
 
   let resal = true;
-  let setinte;
+  // let setinte;
   localStorage.removeItem('nevosprozwodi');
+  // recognizer events
 
-  recognizer.onstart = (e) => {
-   
+  recognizer.onstart = (e) => { 
     localStorage.setItem('nevosprozwodi','zapis')
     // console.log("Распознавание голоса запущено" + selStart);
-
     // multiPlepresButtons(true,selStart) не был включен
   };
 
   recognizer.onerror = ({ error }) => {
     console.error(error);
-    console.log(error);
-    // console.log('erorrrr======');
     resal = false;
     stop();
-    // let count = 0 
     switch (error) {
       case 'no-speech':
         openTextUserError('no_speech','Не молчи, слово молви добрый человек');
@@ -59,39 +197,33 @@ const  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, s
       case 'network':
         openTextUserError('network','Отсутствует соединение к интернету!')
         break;
-      case 'aborted':
-        openTextUserError('aborted','Что-то вызвало резкий обрыв записи!',null,4000);
-        break;
+      // case 'aborted':
+      //   openTextUserError('aborted','Что-то вызвало резкий обрыв записи!',null,4000);
+      //   break;
     }
-    // if (error == 'no-speech') {
-    //   // resal = false;
-    //   // stop();
-    //  return openTextUserError('Не молчи, слово молви добрый человек')
-    // } 
-    // if (error == 'not-allowed') {
-    //   // resal = false;
-    //   // stop();
-    //   return openTextUserError('Вы не дали доступ к микрофону!', 'https://knowledge.granatum.solutions/2020/04/02/access-to-the-camera-and-microphone-in-different-browsers/');
-    // } 
-    // if (error == 'network') {
-    //   // resal = false;
-    //   // stop();
-
-    //   return openTextUserError('Отсутствует соединение к интернету!')
-    //   // recognizer.start();
-    // }
-    // if (error == 'aborted') {
-    //   // resal = false;
-    //   // stop();
-    //   return openTextUserError('Что-то вызвало резкий обрыв записи!',null,4000);
-    // }
   };
 
+  // recognizer.onsoundend = (event) => {
+  //   // console.log(event);
+  //   console.log("Sound has stopped being received");
+  // };
+
+  // recognizer.onspeechend = (e) => {
+  //   // console.log(e);
+  //   console.log("ты перестал говорить");
+  // };
+
   recognizer.onend = () => {
-    // console.log("Распознавание голоса закончено" + selStart);
+    console.log("Распознавание голоса закончено " + selStart +new Date().toLocaleTimeString());
     stop();
-    // openTextUserError('Распознование голоса завершилось!',null,4000);
+    removeAttributNadClass();
+    // console.log(localStorage.getItem(selLocal));
+    addAnswer(localStorage.getItem(selLocal));
+
+    // !global.mobaleMOde && openTextUserError('net','Распознование голоса завершилось!',null,3000);
     multiPlepresButtons(false,selStart); //был включен
+    if(textare.value.length < 3) widjetCircolLev();
+    
     localStorage.removeItem('nevosprozwodi');
     // console.log(!resal);
     if (!resal) return;
@@ -125,73 +257,44 @@ const  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, s
   }
 
   function removebt(e){
-    e.preventDefault()
-
-
-    let target = e.target.parentNode.nextElementSibling;
-    // if(e.target.localName === "button") {
-    //   target = e.target.parentNode.nextElementSibling
-    // } else {
-    //   target = e.target.parentNode.parentNode.nextElementSibling
-    // }
-    target.value = '';
-    target.innerHTML = '';
+    e.preventDefault();
+    params.textare.value = '';
+    params.textare.innerHTML = '';
     localSet('');
     removeAnswer(selLocal);
-    // localStorage.setItem(selLocal, '');
-    widjetCircolLev()
-    target= null;
+    widjetCircolLev();
   }
 
 
-  // automationSizeInput(textare)
-
-
-     
-
   function startVoise(event) { 
-    event.preventDefault();
-    if (params.btnStartVoise.classList.contains('iconActive')) {
-      return
-    }
-    stopVoiseSpeecAll();
+    event && event.preventDefault();
+    if (params.btnStartVoise.classList.contains('iconActive')) return;
+    
+    // stopVoiseSpeecAll();
     
     //set localStorage Where Stay user 
     localStorage.setItem('WhereStayUser',selLocal);
     params.material_fb.classList.add('icon-material_Pulsev');
     
     resal = true;
-    document.querySelector(selVoisIcPuls).classList.add('iconActive');
+    document.querySelector('#voisIconi'+key).classList.add('iconActive');
+    // document.querySelector(selVoisIcPuls).classList.add('iconActive');
 
     recognizer.start();
     recognizer.onresult = function (event) {
       let result = event.results[event.resultIndex];
       saveResultTranscript(result.isFinal?true:false, result,selLocal );
-      // if (result.isFinal) {
-      //     // console.log('Вы сказали в тоге: ' + result[0].transcript);
-      //     saveResultTranscript(true, result,selLocal );
-      // } else {
-      //     // console.log('Промежуточный результат: ', result[0].transcript);
-      //     // …то отображаем его содержимое в нашем редакторе
-      //     saveResultTranscript(false, result,selLocal );
-      // }
+      
       result = null;
     };
     multiPlepresButtons(true,selStart); // был включен
   }
 
-
   function stop(event) {
-    event&&event.preventDefault();
-
+    event&& event.preventDefault();
     params.material_fb.classList.remove('icon-material_Pulsev');
-
+    console.log(params.btnStartVoise);
     params.btnStartVoise.children[0].classList.remove('iconActive');
-    // if(params.btnStartVoise.children[0].attributes[0].classList.contains('iconActive')){
-    //   console.log(params.btnStartVoise.children[0].attributes[0].ownerElement);
-    //   console.log(params.btnStartVoise.children[0]);
-    // }
-
     params.btnStartVoise.classList.add('start')
     resal = false;
     recognizer.stop();
@@ -212,12 +315,12 @@ const  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, s
   // let db= window.dbasce;
 
   function removeAnswer(key) {
-    let db= window.dbasce;
-    let ap = selLocal.replace(/(\d)+/,'')
-    let transaction = db.transaction([ap],"readwrite");
-    let store = transaction.objectStore(ap);
-    
-    let request = store.delete(key);
+    // let ap = selLocal.replace(/(\d)+/,'');
+    let db= window.dbasce,
+        ap = selLocalRepl,
+        transaction = db.transaction([ap],"readwrite"),
+        store = transaction.objectStore(ap),
+        request = store.delete(key);
     //
     request.onsuccess = function(e) {
         // console.log('удивленно нахуй');
@@ -226,25 +329,23 @@ const  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, s
   }
  
   function getAnswer() {
-    let db= window.dbasce;
-
+    
     if (getAnswer.isRun) {
       return 
     }
-
-    let ap = selLocal.replace(/(\d)+/,'')
-
-    let transaction = db.transaction([ap],"readonly");
-    let store = transaction.objectStore(ap);
-
-    let request = store.get(selLocal);
+    // let ap = selLocal.replace(/(\d)+/,'')
+    let db= window.dbasce,
+        ap = selLocalRepl,
+        transaction = db.transaction([ap],"readonly"),
+        store = transaction.objectStore(ap),
+        request = store.get(selLocal);
   
   //
     request.onsuccess = function(e) {
       let result = e.target.result;
       // console.log(result);
         result? saveResultTranscript(true, false, selLocal,result['value']):'';
-        db,ap,transaction,store,request = null;
+        db,ap,transaction,store,request,result = null;
         
       }	
       getAnswer.isRun = true
@@ -257,29 +358,21 @@ const  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, s
   
 
   function addAnswer(value) {
-    let db= window.dbasce;
+    let db= window.dbasce,
+        ap = selLocalRepl,
+        transaction = db.transaction([ap],"readwrite"),
+        store = transaction.objectStore(ap),
+        person = {
+          name:selLocal,
+          value:value,
+        },
+        request = store.put(person);
+        // let ap = selLocal.replace(/(\d)+/,'')
 
-    let ap = selLocal.replace(/(\d)+/,'')
-    //Get a transaction
-    //default for OS list is all, default for type is read
-    let transaction = db.transaction([ap],"readwrite");
-    //Ask for the objectStore
-    let store = transaction.objectStore(ap);
-  
-    //Define a person
-    let person = {
-      name:selLocal,
-      value:value,
-    }
-  
-    //Perform the add
-    // let request = store.add(person);
-    let request = store.put(person);
   
     request.onerror = function(e) {
       //some type of error handler
       db,ap,transaction,store,person,request = null;
-
     }
   
     // request.onsuccess = function(e) {
@@ -301,17 +394,13 @@ const  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, s
     // …то отображаем его содержимое в нашем редакторе
     let local = localStorage.getItem(selLocal),
     cor = (local?local:'') +' '+ (result? result[0].transcript:'').trim();
-    // cor = `${local?local:''} ${result? result[0].transcript:''}`;
-    // cor = `${local?local:''} ${result? result[0].transcript:''}`.trim();
     // params.textare.value = chech(cor);  //был включен
     params.textare.value = cor;  //был включен
 
     if (save) {
        params.textare.value = chech(cor);  //был включен
         localSet(cor);
-        // addAnswer(localStorage.getItem(selLocal))
-        // addAnswer(cor.trim());
-        addAnswer(cor);
+        // addAnswer(cor);
       }
       local = null;
       cor = null;
@@ -319,33 +408,15 @@ const  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, s
 
   function localSet(params) {
     localStorage.setItem(selLocal,chech(params)); 
-    // addAnswer(selLocal,chech(params));
   }
 
 
-  window.res = [respBtn,removebt,startVoise,stop,textf,params];
-
-
-  if(!openAll){
-    let timeModeNonStop = setTimeout(() => {
-      modeNonStop(params.btnStartVoise,params.letstop,selPahtVoid,openAll)
-
-      // очистка
-      clearTimeout(timeModeNonStop);
-      timeModeNonStop = null
-    }, 10);
-  }
-
-  if (!openAll) {
-    let time = setTimeout(() => {
-      elemScroll(selLocal);
-
-      // очистка
-      clearTimeout(time);
-      time = null
-    }, 10);
-  }
-
+  
 }
 
+//     // modeNonStop(params.btnStartVoise,params.letstop,selPahtVoid,openAll)
+
 export default app
+
+
+
