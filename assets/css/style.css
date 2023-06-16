@@ -667,7 +667,7 @@ form .row textarea::-webkit-scrollbar {
   -webkit-box-pack: justify;
   -ms-flex-pack: justify;
   justify-content: space-between;
-  min-height: 234px;
+  /* min-height: 234px; */
 }
 
 .hideModal {
