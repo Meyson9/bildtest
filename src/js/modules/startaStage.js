@@ -3,7 +3,7 @@ import openAllQuestion from "./openAllQuestion";
 import whereStay from "./whereStay";
 import lostMicrophone from "./lostMicrophone";
 import widjetCircolLev from "../services/widjetCircolLev";
-import { stopVoiseLisenerAll,createElementMobaile, removeLocalStoregeQuestion } from "../services/LitlModules";
+import { stopVoiseLisenerAll,createElementMobaile, removeLocalStoregeQuestion,scrollDown } from "../services/LitlModules";
 import burgerMenu from "../services/burgerMenuFunction";
 import clickIphone from "../services/clickIphone";
 
@@ -17,8 +17,10 @@ const startaStage = () =>{
   let selectorListQ = [];
   btnsStart.forEach((item)=> {
     item.addEventListener('click', (e)=>{
+      e.preventDefault();
       selectorListQ = [];
       // console.log(e);
+      
      let targetBtn = e.target,
          time,
          navel = document.querySelector('#navel'),
@@ -30,8 +32,8 @@ const startaStage = () =>{
          localSel = targetBtn.classList[2],
          width = Math.max( body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth ),
          btn = document.querySelector('.staet');
-
-     
+        //  console.log(targetBtn);
+        //  console.log(localSel);
      window.modeloderad = false;
      
      if(document.querySelector('#navel').parentElement ==  document.querySelector('.time__segment') ){
@@ -100,8 +102,18 @@ const startaStage = () =>{
           // whereStay(document.querySelector('.wher'));
           // togallVois(true);
           lostMicrophone(true);
+          const iconMaterialOpenAll = document.querySelector('.icon-material_gp');
+          const elementList = document.querySelector('.gp_segment');
+          
+          elementList.removeEventListener('click', scrollDown);
+          elementList.removeEventListener('click',()=>{clickIphone(selectorListQ)}, {once:true})
+          
+          elementList.addEventListener('click',()=>{clickIphone(selectorListQ)}, {once:true});
+          
 
-          document.querySelector('.gp_segment').addEventListener('click',()=>{clickIphone(selectorListQ)},{once:true});
+          iconMaterialOpenAll.parentElement.setAttribute('data-tooltip',"Показать все"); 
+          iconMaterialOpenAll.classList.remove('icon-material_scrollDown');
+
   } else {
           if(btn.classList.contains('hide')){
             btn.classList.remove('hide');
@@ -130,9 +142,21 @@ const startaStage = () =>{
         }
 
         removeLocalStoregeQuestion();
-    
+        const boolean = global.mobaleMOde && width <= 775
+        if(boolean){
+          let list = document.querySelector('.wrapperPagestart'),
+              elem = document.querySelectorAll('.tinRightIn');
+          if(elem){
+              elem = null;
+  
+            list.replaceChildren();
+            // document.body.style.height  = height +'px'
+          } 
+          wrapperTutle.classList.add('pps');
 
+        }
      let time4 = setTimeout(() => {
+      if(!boolean){
         let list = document.querySelector('.wrapperPagestart'),
             elem = document.querySelectorAll('.tinRightIn');
         if(elem){
@@ -141,7 +165,7 @@ const startaStage = () =>{
           list.replaceChildren();
           // document.body.style.height  = height +'px'
         } 
-
+      }
         localStorage.setItem('sel',sel);
      
         // window.selFoOpenAllquestion = sel;
@@ -154,7 +178,7 @@ const startaStage = () =>{
         widjetCircolLev(sel);
         clearTimeout(time4);
         time4 = null;
-      }, 800);  
+      },boolean? 400:800);  
     })
   })
   

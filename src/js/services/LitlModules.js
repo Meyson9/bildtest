@@ -153,6 +153,9 @@ function removeLocalStoregeQuestion() {
     selectorQuestionLevel = null;
   }
 }
-export {stopVoiseLisenerAll,stopVoiseSpeecAll,createElementMobaile,openTextUserError,removeAttributNadClass,removeLocalStoregeQuestion}
+function scrollDown() {
+  document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({block: "start", behavior: "smooth"});
+}
+export {stopVoiseLisenerAll,stopVoiseSpeecAll,createElementMobaile,openTextUserError,removeAttributNadClass,removeLocalStoregeQuestion, scrollDown}
 
 

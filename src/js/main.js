@@ -54,7 +54,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		global.mobaleMOde = true;
 		btn.classList.add('hide');
 
-		whereStay(document.querySelector('.wher'));
+		// whereStay(document.querySelector('.wher'));
 		lostMicrophone(true);
 	} else {
 		// window.mobaleMOde = false;

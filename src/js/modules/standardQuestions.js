@@ -59,8 +59,7 @@ const standardQuestions = (element, selectorCit = 'standart',key, openAll=false,
             
            </div>
              
-           <textarea class="lasss lasss${key}" >
-           </textarea>
+           <textarea class="lasss lasss${key}" ></textarea>
         
           </div>
         

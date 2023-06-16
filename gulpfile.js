@@ -6,7 +6,8 @@ const browsersync = require("browser-sync");
 const autoprefixer = require('gulp-autoprefixer')
 // const dist = "./dist/";
 // const dist = "C:/MAMP/htdocs/testingQuestion";
-const dist = "C:/MAMP/htdocs/testingQuestion";
+const dist = "E:/questionQA/dist";
+// const dist = "C:/MAMP/htdocs/testingQuestion";
 // const dist = "C:/xren/voise";
 
 gulp.task("copy-html", () => {

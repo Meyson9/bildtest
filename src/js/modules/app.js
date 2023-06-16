@@ -28,6 +28,8 @@ let  app = (key, selStart,selLocal,selLocalRepl, openAll,viosPath = 'assets/vois
 
   mySound &&  pauseVid(mySound);
   mySound = new Audio(viosPath);  
+  // if (!openAll) {
+  // }
 
 
     document.querySelector('.progress__bar'+key).addEventListener('click', setProgress);
@@ -117,7 +119,7 @@ let  app = (key, selStart,selLocal,selLocalRepl, openAll,viosPath = 'assets/vois
 
         mySound.onloadedmetadata = function() {
           let b =  setTimeout(() => {
-            console.log('clear nau');  
+            // console.log('clear nau');  
             // clearInterval(i);
               if(c!==true) setListeerBtnPlay();
 
@@ -135,7 +137,7 @@ let  app = (key, selStart,selLocal,selLocalRepl, openAll,viosPath = 'assets/vois
               // очистка
               clearTimeout(time);
               time = null;
-            }, 700);
+            }, global.mobaleMOde? 400:700);
           }
 
       } else { // кроме apple
@@ -156,12 +158,15 @@ let  app = (key, selStart,selLocal,selLocalRepl, openAll,viosPath = 'assets/vois
     audio_button.addEventListener('click', (e) =>{
         e.preventDefault();
         if (audio_button.classList.contains('audio_play')) {
+
             mySound && mySound.pause();
             mySound = new Audio(viosPath);
+          
             if(curtiem) {
                mySound.currentTime = curtiem;
                curtiem = null;
             }
+          
             playVid(mySound);
            } else {
              pauseVid(mySound);
@@ -219,10 +224,10 @@ let  app = (key, selStart,selLocal,selLocalRepl, openAll,viosPath = 'assets/vois
     removeAttributNadClass();
     // console.log(localStorage.getItem(selLocal));
     addAnswer(localStorage.getItem(selLocal));
-
+     
     // !global.mobaleMOde && openTextUserError('net','Распознование голоса завершилось!',null,3000);
     multiPlepresButtons(false,selStart); //был включен
-    if(textare.value.length < 3) widjetCircolLev();
+    if(params.textare.value.length < 3) widjetCircolLev();
     
     localStorage.removeItem('nevosprozwodi');
     // console.log(!resal);
@@ -388,17 +393,18 @@ let  app = (key, selStart,selLocal,selLocalRepl, openAll,viosPath = 'assets/vois
   function saveResultTranscript(save = true, result, selLocal,oneSeveer=false) {
     //target result
     widjetCircolLev();
+    
     // automationSizeInput(textare);
     oneSeveer?localStorage.setItem(selLocal,oneSeveer):'';
 
     // …то отображаем его содержимое в нашем редакторе
     let local = localStorage.getItem(selLocal),
-    cor = (local?local:'') +' '+ (result? result[0].transcript:'').trim();
+    cor = (local?local:'') +' '+ (result? result[0].transcript:'');
     // params.textare.value = chech(cor);  //был включен
     params.textare.value = cor;  //был включен
 
     if (save) {
-       params.textare.value = chech(cor);  //был включен
+       params.textare.value = chech(cor).trim();  //был включен
         localSet(cor);
         // addAnswer(cor);
       }
@@ -407,7 +413,7 @@ let  app = (key, selStart,selLocal,selLocalRepl, openAll,viosPath = 'assets/vois
   }
 
   function localSet(params) {
-    localStorage.setItem(selLocal,chech(params)); 
+    localStorage.setItem(selLocal,chech(params).trim()); 
   }
 
 
