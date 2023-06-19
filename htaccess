@@ -1,4 +1,4 @@
-ErrorDocument 404 E:\questionQA\src\error404.html
+ErrorDocument 404 https://github.com/Meyson9/bildtest/error404.html
 <IfModule mod_expires.c>
 ExpiresActive On
    ExpiresByType image/jpg "access 1 year"
