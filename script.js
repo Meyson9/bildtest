@@ -86,6 +86,752 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./node_modules/buzz/dist/buzz.js":
+/*!****************************************!*\
+  !*** ./node_modules/buzz/dist/buzz.js ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__; // ----------------------------------------------------------------------------
+ // Buzz, a Javascript HTML5 Audio library
+ // v1.2.1 - Built 2018-05-10 10:14
+ // Licensed under the MIT license.
+ // http://buzz.jaysalvat.com/
+ // ----------------------------------------------------------------------------
+ // Copyright (C) 2010-2018 Jay Salvat
+ // http://jaysalvat.com/
+ // ----------------------------------------------------------------------------
+
+(function(context, factory) {
+    "use strict";
+    if ( true && module.exports) {
+        module.exports = factory();
+    } else if (true) {
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+    } else {}
+})(this, function() {
+    "use strict";
+    var AudioContext = window.AudioContext || window.webkitAudioContext;
+    var buzz = {
+        defaults: {
+            autoplay: false,
+            crossOrigin: null,
+            duration: 5e3,
+            formats: [],
+            loop: false,
+            placeholder: "--",
+            preload: "metadata",
+            volume: 80,
+            webAudioApi: false,
+            document: window.document
+        },
+        types: {
+            mp3: "audio/mpeg",
+            ogg: "audio/ogg",
+            wav: "audio/wav",
+            aac: "audio/aac",
+            m4a: "audio/x-m4a"
+        },
+        sounds: [],
+        el: document.createElement("audio"),
+        getAudioContext: function() {
+            if (this.audioCtx === undefined) {
+                try {
+                    this.audioCtx = AudioContext ? new AudioContext() : null;
+                } catch (e) {
+                    this.audioCtx = null;
+                }
+            }
+            return this.audioCtx;
+        },
+        sound: function(src, options) {
+            options = options || {};
+            var doc = options.document || buzz.defaults.document;
+            var pid = 0, events = [], eventsOnce = {}, supported = buzz.isSupported();
+            this.load = function() {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.load();
+                return this;
+            };
+            this.play = function() {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.play().catch(function() {});
+                return this;
+            };
+            this.togglePlay = function() {
+                if (!supported) {
+                    return this;
+                }
+                if (this.sound.paused) {
+                    this.sound.play().catch(function() {});
+                } else {
+                    this.sound.pause();
+                }
+                return this;
+            };
+            this.pause = function() {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.pause();
+                return this;
+            };
+            this.isPaused = function() {
+                if (!supported) {
+                    return null;
+                }
+                return this.sound.paused;
+            };
+            this.stop = function() {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.pause();
+                this.setTime(0);
+                return this;
+            };
+            this.isEnded = function() {
+                if (!supported) {
+                    return null;
+                }
+                return this.sound.ended;
+            };
+            this.loop = function() {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.loop = "loop";
+                this.bind("ended.buzzloop", function() {
+                    this.currentTime = 0;
+                    this.play();
+                });
+                return this;
+            };
+            this.unloop = function() {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.removeAttribute("loop");
+                this.unbind("ended.buzzloop");
+                return this;
+            };
+            this.mute = function() {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.muted = true;
+                return this;
+            };
+            this.unmute = function() {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.muted = false;
+                return this;
+            };
+            this.toggleMute = function() {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.muted = !this.sound.muted;
+                return this;
+            };
+            this.isMuted = function() {
+                if (!supported) {
+                    return null;
+                }
+                return this.sound.muted;
+            };
+            this.setVolume = function(volume) {
+                if (!supported) {
+                    return this;
+                }
+                if (volume < 0) {
+                    volume = 0;
+                }
+                if (volume > 100) {
+                    volume = 100;
+                }
+                this.volume = volume;
+                this.sound.volume = volume / 100;
+                return this;
+            };
+            this.getVolume = function() {
+                if (!supported) {
+                    return this;
+                }
+                return this.volume;
+            };
+            this.increaseVolume = function(value) {
+                return this.setVolume(this.volume + (value || 1));
+            };
+            this.decreaseVolume = function(value) {
+                return this.setVolume(this.volume - (value || 1));
+            };
+            this.setTime = function(time) {
+                if (!supported) {
+                    return this;
+                }
+                var set = true;
+                this.whenReady(function() {
+                    if (set === true) {
+                        set = false;
+                        this.sound.currentTime = time;
+                    }
+                });
+                return this;
+            };
+            this.getTime = function() {
+                if (!supported) {
+                    return null;
+                }
+                var time = Math.round(this.sound.currentTime * 100) / 100;
+                return isNaN(time) ? buzz.defaults.placeholder : time;
+            };
+            this.setPercent = function(percent) {
+                if (!supported) {
+                    return this;
+                }
+                return this.setTime(buzz.fromPercent(percent, this.sound.duration));
+            };
+            this.getPercent = function() {
+                if (!supported) {
+                    return null;
+                }
+                var percent = Math.round(buzz.toPercent(this.sound.currentTime, this.sound.duration));
+                return isNaN(percent) ? buzz.defaults.placeholder : percent;
+            };
+            this.setSpeed = function(duration) {
+                if (!supported) {
+                    return this;
+                }
+                this.sound.playbackRate = duration;
+                return this;
+            };
+            this.getSpeed = function() {
+                if (!supported) {
+                    return null;
+                }
+                return this.sound.playbackRate;
+            };
+            this.getDuration = function() {
+                if (!supported) {
+                    return null;
+                }
+                var duration = Math.round(this.sound.duration * 100) / 100;
+                return isNaN(duration) ? buzz.defaults.placeholder : duration;
+            };
+            this.getPlayed = function() {
+                if (!supported) {
+                    return null;
+                }
+                return timerangeToArray(this.sound.played);
+            };
+            this.getBuffered = function() {
+                if (!supported) {
+                    return null;
+                }
+                return timerangeToArray(this.sound.buffered);
+            };
+            this.getSeekable = function() {
+                if (!supported) {
+                    return null;
+                }
+                return timerangeToArray(this.sound.seekable);
+            };
+            this.getErrorCode = function() {
+                if (supported && this.sound.error) {
+                    return this.sound.error.code;
+                }
+                return 0;
+            };
+            this.getErrorMessage = function() {
+                if (!supported) {
+                    return null;
+                }
+                switch (this.getErrorCode()) {
+                  case 1:
+                    return "MEDIA_ERR_ABORTED";
+
+                  case 2:
+                    return "MEDIA_ERR_NETWORK";
+
+                  case 3:
+                    return "MEDIA_ERR_DECODE";
+
+                  case 4:
+                    return "MEDIA_ERR_SRC_NOT_SUPPORTED";
+
+                  default:
+                    return null;
+                }
+            };
+            this.getStateCode = function() {
+                if (!supported) {
+                    return null;
+                }
+                return this.sound.readyState;
+            };
+            this.getStateMessage = function() {
+                if (!supported) {
+                    return null;
+                }
+                switch (this.getStateCode()) {
+                  case 0:
+                    return "HAVE_NOTHING";
+
+                  case 1:
+                    return "HAVE_METADATA";
+
+                  case 2:
+                    return "HAVE_CURRENT_DATA";
+
+                  case 3:
+                    return "HAVE_FUTURE_DATA";
+
+                  case 4:
+                    return "HAVE_ENOUGH_DATA";
+
+                  default:
+                    return null;
+                }
+            };
+            this.getNetworkStateCode = function() {
+                if (!supported) {
+                    return null;
+                }
+                return this.sound.networkState;
+            };
+            this.getNetworkStateMessage = function() {
+                if (!supported) {
+                    return null;
+                }
+                switch (this.getNetworkStateCode()) {
+                  case 0:
+                    return "NETWORK_EMPTY";
+
+                  case 1:
+                    return "NETWORK_IDLE";
+
+                  case 2:
+                    return "NETWORK_LOADING";
+
+                  case 3:
+                    return "NETWORK_NO_SOURCE";
+
+                  default:
+                    return null;
+                }
+            };
+            this.set = function(key, value) {
+                if (!supported) {
+                    return this;
+                }
+                this.sound[key] = value;
+                return this;
+            };
+            this.get = function(key) {
+                if (!supported) {
+                    return null;
+                }
+                return key ? this.sound[key] : this.sound;
+            };
+            this.bind = function(types, func) {
+                if (!supported) {
+                    return this;
+                }
+                types = types.split(" ");
+                var self = this, efunc = function(e) {
+                    func.call(self, e);
+                };
+                for (var t = 0; t < types.length; t++) {
+                    var type = types[t], idx = type;
+                    type = idx.split(".")[0];
+                    events.push({
+                        idx: idx,
+                        func: efunc
+                    });
+                    this.sound.addEventListener(type, efunc, true);
+                }
+                return this;
+            };
+            this.unbind = function(types) {
+                if (!supported) {
+                    return this;
+                }
+                types = types.split(" ");
+                for (var t = 0; t < types.length; t++) {
+                    var idx = types[t], type = idx.split(".")[0];
+                    for (var i = 0; i < events.length; i++) {
+                        var namespace = events[i].idx.split(".");
+                        if (events[i].idx === idx || namespace[1] && namespace[1] === idx.replace(".", "")) {
+                            this.sound.removeEventListener(type, events[i].func, true);
+                            events.splice(i, 1);
+                        }
+                    }
+                }
+                return this;
+            };
+            this.bindOnce = function(type, func) {
+                if (!supported) {
+                    return this;
+                }
+                var self = this;
+                eventsOnce[pid++] = false;
+                this.bind(type + "." + pid, function() {
+                    if (!eventsOnce[pid]) {
+                        eventsOnce[pid] = true;
+                        func.call(self);
+                    }
+                    self.unbind(type + "." + pid);
+                });
+                return this;
+            };
+            this.trigger = function(types, detail) {
+                if (!supported) {
+                    return this;
+                }
+                types = types.split(" ");
+                for (var t = 0; t < types.length; t++) {
+                    var idx = types[t];
+                    for (var i = 0; i < events.length; i++) {
+                        var eventType = events[i].idx.split(".");
+                        if (events[i].idx === idx || eventType[0] && eventType[0] === idx.replace(".", "")) {
+                            var evt = doc.createEvent("HTMLEvents");
+                            evt.initEvent(eventType[0], false, true);
+                            evt.originalEvent = detail;
+                            this.sound.dispatchEvent(evt);
+                        }
+                    }
+                }
+                return this;
+            };
+            this.fadeTo = function(to, duration, callback) {
+                if (!supported) {
+                    return this;
+                }
+                if (duration instanceof Function) {
+                    callback = duration;
+                    duration = buzz.defaults.duration;
+                } else {
+                    duration = duration || buzz.defaults.duration;
+                }
+                var from = this.volume, delay = duration / Math.abs(from - to), self = this, fadeToTimeout;
+                this.play();
+                function doFade() {
+                    clearTimeout(fadeToTimeout);
+                    fadeToTimeout = setTimeout(function() {
+                        if (from < to && self.volume < to) {
+                            self.setVolume(self.volume += 1);
+                            doFade();
+                        } else if (from > to && self.volume > to) {
+                            self.setVolume(self.volume -= 1);
+                            doFade();
+                        } else if (callback instanceof Function) {
+                            callback.apply(self);
+                        }
+                    }, delay);
+                }
+                this.whenReady(function() {
+                    doFade();
+                });
+                return this;
+            };
+            this.fadeIn = function(duration, callback) {
+                if (!supported) {
+                    return this;
+                }
+                return this.setVolume(0).fadeTo(100, duration, callback);
+            };
+            this.fadeOut = function(duration, callback) {
+                if (!supported) {
+                    return this;
+                }
+                return this.fadeTo(0, duration, callback);
+            };
+            this.fadeWith = function(sound, duration) {
+                if (!supported) {
+                    return this;
+                }
+                this.fadeOut(duration, function() {
+                    this.stop();
+                });
+                sound.play().fadeIn(duration);
+                return this;
+            };
+            this.whenReady = function(func) {
+                if (!supported) {
+                    return null;
+                }
+                var self = this;
+                if (this.sound.readyState === 0) {
+                    this.bind("canplay.buzzwhenready", function() {
+                        func.call(self);
+                    });
+                } else {
+                    func.call(self);
+                }
+            };
+            this.addSource = function(src) {
+                var self = this, source = doc.createElement("source");
+                source.src = src;
+                if (buzz.types[getExt(src)]) {
+                    source.type = buzz.types[getExt(src)];
+                }
+                this.sound.appendChild(source);
+                source.addEventListener("error", function(e) {
+                    self.trigger("sourceerror", e);
+                });
+                return source;
+            };
+            function timerangeToArray(timeRange) {
+                var array = [], length = timeRange.length - 1;
+                for (var i = 0; i <= length; i++) {
+                    array.push({
+                        start: timeRange.start(i),
+                        end: timeRange.end(i)
+                    });
+                }
+                return array;
+            }
+            function getExt(filename) {
+                return filename.split(".").pop();
+            }
+            if (supported && src) {
+                for (var i in buzz.defaults) {
+                    if (buzz.defaults.hasOwnProperty(i)) {
+                        if (options[i] === undefined) {
+                            options[i] = buzz.defaults[i];
+                        }
+                    }
+                }
+                this.sound = doc.createElement("audio");
+                if (options.crossOrigin !== null) {
+                    this.sound.crossOrigin = options.crossOrigin;
+                }
+                if (options.webAudioApi) {
+                    var audioCtx = buzz.getAudioContext();
+                    if (audioCtx) {
+                        this.source = audioCtx.createMediaElementSource(this.sound);
+                        this.source.connect(audioCtx.destination);
+                    }
+                }
+                if (src instanceof Array) {
+                    for (var j in src) {
+                        if (src.hasOwnProperty(j)) {
+                            this.addSource(src[j]);
+                        }
+                    }
+                } else if (options.formats.length) {
+                    for (var k in options.formats) {
+                        if (options.formats.hasOwnProperty(k)) {
+                            this.addSource(src + "." + options.formats[k]);
+                        }
+                    }
+                } else {
+                    this.addSource(src);
+                }
+                if (options.loop) {
+                    this.loop();
+                }
+                if (options.autoplay) {
+                    this.sound.autoplay = "autoplay";
+                }
+                if (options.preload === true) {
+                    this.sound.preload = "auto";
+                } else if (options.preload === false) {
+                    this.sound.preload = "none";
+                } else {
+                    this.sound.preload = options.preload;
+                }
+                this.setVolume(options.volume);
+                buzz.sounds.push(this);
+            }
+        },
+        group: function(sounds) {
+            sounds = argsToArray(sounds, arguments);
+            this.getSounds = function() {
+                return sounds;
+            };
+            this.add = function(soundArray) {
+                soundArray = argsToArray(soundArray, arguments);
+                for (var a = 0; a < soundArray.length; a++) {
+                    sounds.push(soundArray[a]);
+                }
+            };
+            this.remove = function(soundArray) {
+                soundArray = argsToArray(soundArray, arguments);
+                for (var a = 0; a < soundArray.length; a++) {
+                    for (var i = 0; i < sounds.length; i++) {
+                        if (sounds[i] === soundArray[a]) {
+                            sounds.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+            };
+            this.load = function() {
+                fn("load");
+                return this;
+            };
+            this.play = function() {
+                fn("play");
+                return this;
+            };
+            this.togglePlay = function() {
+                fn("togglePlay");
+                return this;
+            };
+            this.pause = function(time) {
+                fn("pause", time);
+                return this;
+            };
+            this.stop = function() {
+                fn("stop");
+                return this;
+            };
+            this.mute = function() {
+                fn("mute");
+                return this;
+            };
+            this.unmute = function() {
+                fn("unmute");
+                return this;
+            };
+            this.toggleMute = function() {
+                fn("toggleMute");
+                return this;
+            };
+            this.setVolume = function(volume) {
+                fn("setVolume", volume);
+                return this;
+            };
+            this.increaseVolume = function(value) {
+                fn("increaseVolume", value);
+                return this;
+            };
+            this.decreaseVolume = function(value) {
+                fn("decreaseVolume", value);
+                return this;
+            };
+            this.loop = function() {
+                fn("loop");
+                return this;
+            };
+            this.unloop = function() {
+                fn("unloop");
+                return this;
+            };
+            this.setSpeed = function(speed) {
+                fn("setSpeed", speed);
+                return this;
+            };
+            this.setTime = function(time) {
+                fn("setTime", time);
+                return this;
+            };
+            this.set = function(key, value) {
+                fn("set", key, value);
+                return this;
+            };
+            this.bind = function(type, func) {
+                fn("bind", type, func);
+                return this;
+            };
+            this.unbind = function(type) {
+                fn("unbind", type);
+                return this;
+            };
+            this.bindOnce = function(type, func) {
+                fn("bindOnce", type, func);
+                return this;
+            };
+            this.trigger = function(type) {
+                fn("trigger", type);
+                return this;
+            };
+            this.fade = function(from, to, duration, callback) {
+                fn("fade", from, to, duration, callback);
+                return this;
+            };
+            this.fadeIn = function(duration, callback) {
+                fn("fadeIn", duration, callback);
+                return this;
+            };
+            this.fadeOut = function(duration, callback) {
+                fn("fadeOut", duration, callback);
+                return this;
+            };
+            function fn() {
+                var args = argsToArray(null, arguments), func = args.shift();
+                for (var i = 0; i < sounds.length; i++) {
+                    sounds[i][func].apply(sounds[i], args);
+                }
+            }
+            function argsToArray(array, args) {
+                return array instanceof Array ? array : Array.prototype.slice.call(args);
+            }
+        },
+        all: function() {
+            return new buzz.group(buzz.sounds);
+        },
+        isSupported: function() {
+            return !!buzz.el.canPlayType;
+        },
+        isOGGSupported: function() {
+            return !!buzz.el.canPlayType && buzz.el.canPlayType('audio/ogg; codecs="vorbis"');
+        },
+        isWAVSupported: function() {
+            return !!buzz.el.canPlayType && buzz.el.canPlayType('audio/wav; codecs="1"');
+        },
+        isMP3Supported: function() {
+            return !!buzz.el.canPlayType && buzz.el.canPlayType("audio/mpeg;");
+        },
+        isAACSupported: function() {
+            return !!buzz.el.canPlayType && (buzz.el.canPlayType("audio/x-m4a;") || buzz.el.canPlayType("audio/aac;"));
+        },
+        toTimer: function(time, withHours) {
+            var h, m, s;
+            h = Math.floor(time / 3600);
+            h = isNaN(h) ? "--" : h >= 10 ? h : "0" + h;
+            m = withHours ? Math.floor(time / 60 % 60) : Math.floor(time / 60);
+            m = isNaN(m) ? "--" : m >= 10 ? m : "0" + m;
+            s = Math.floor(time % 60);
+            s = isNaN(s) ? "--" : s >= 10 ? s : "0" + s;
+            return withHours ? h + ":" + m + ":" + s : m + ":" + s;
+        },
+        fromTimer: function(time) {
+            var splits = time.toString().split(":");
+            if (splits && splits.length === 3) {
+                time = parseInt(splits[0], 10) * 3600 + parseInt(splits[1], 10) * 60 + parseInt(splits[2], 10);
+            }
+            if (splits && splits.length === 2) {
+                time = parseInt(splits[0], 10) * 60 + parseInt(splits[1], 10);
+            }
+            return time;
+        },
+        toPercent: function(value, total, decimal) {
+            var r = Math.pow(10, decimal || 0);
+            return Math.round(value * 100 / total * r) / r;
+        },
+        fromPercent: function(percent, total, decimal) {
+            var r = Math.pow(10, decimal || 0);
+            return Math.round(total / 100 * percent * r) / r;
+        }
+    };
+    return buzz;
+});
+
+/***/ }),
+
 /***/ "./node_modules/core-js/internals/a-function.js":
 /*!******************************************************!*\
   !*** ./node_modules/core-js/internals/a-function.js ***!
@@ -4331,10 +5077,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const obj = {
-  'tick': 0,
-  'cross': 0,
-  'heart': 0,
-  'flower': 0
+  tick: 0,
+  cross: 0,
+  heart: 0,
+  flower: 0
 };
 
 function listener(e) {
@@ -4352,7 +5098,8 @@ window.addEventListener('DOMContentLoaded', () => {
   // const i = document.querySelector('less');
   // console.error("Error2");
   // console.log(i);
-  // обработчик на закрытие элемента настроек 
+  // console.log('гавно сделаннное из говна и делал его говноед которгго крестили сука в воде из  унитаза ');
+  // обработчик на закрытие элемента настроек
   document.querySelector('.wraperAllToll').addEventListener('click', e => {
     listener(e);
   });
@@ -4410,13 +5157,14 @@ window.addEventListener('DOMContentLoaded', () => {
 __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _services_multiPlepresButtons__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/multiPlepresButtons */ "./src/js/services/multiPlepresButtons.js");
 /* harmony import */ var _services_chech__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/chech */ "./src/js/services/chech.js");
-/* harmony import */ var _services_elemScroll__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/elemScroll */ "./src/js/services/elemScroll.js");
-/* harmony import */ var _services_LitlModules__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/LitlModules */ "./src/js/services/LitlModules.js");
-/* harmony import */ var _services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/widjetCircolLev */ "./src/js/services/widjetCircolLev.js");
+/* harmony import */ var _services_voiceQuestion__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/voiceQuestion */ "./src/js/services/voiceQuestion.js");
+/* harmony import */ var _services_elemScroll__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/elemScroll */ "./src/js/services/elemScroll.js");
+/* harmony import */ var _services_LitlModules__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/LitlModules */ "./src/js/services/LitlModules.js");
+/* harmony import */ var _services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/widjetCircolLev */ "./src/js/services/widjetCircolLev.js");
 
  // import automationSizeInput from "../services/automationSizeInput";
-// import voiceQuestion from "../services/voiceQuestion";
-// import buzz from "buzz";
+
+ // import buzz from "buzz";
 
  // import modeNonStop from "../services/modeNonStop";
 
@@ -4424,8 +5172,7 @@ __webpack_require__.r(__webpack_exports__);
 
  // let count = 0
 // let  app = (selStart, selStop, selRemove, selTextare, selPahtVoid, selLocal, selBtnResp,selVoisIcPuls,openAll,key,viosId,viosPath = 'assets/voise/samCh.mp3',progress__bar) => {
-
-let mySound;
+// let mySound;
 
 let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/voise/samCh.mp3') => {
   const recognizer = global.recog;
@@ -4439,157 +5186,29 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
     material_fb: document.querySelector('.icon-material_fb')
   };
   let audio_button = document.querySelector('#voise_aa' + key),
-      curtiem;
-  mySound && pauseVid(mySound);
-  mySound = new Audio(viosPath); // if (!openAll) {
+      curtiem; // if(global.appleMode) {
+  //     console.log('lol');
+  // } else {
+  //       // setListeerBtnPlay();
+  //         //   let btnVoiseMute = document.querySelector('#voise_mudte_icon').classList.contains('icon-material_li_mute');
+  //         //   if(!btnVoiseMute) {
+  //         //     recognizer.stop();
+  //         //     playVid(mySound);
+  //         //   }
+  //         //   elemScroll(selLocal);
+  //       // }
+  //       voiceQuestion(mySound, key, selLocal,viosPath, openAll,'app');
+  //     }
+
+  if (!global.appleMode) {
+    Object(_services_voiceQuestion__WEBPACK_IMPORTED_MODULE_2__["default"])(key, selLocal, viosPath, openAll, 'app');
+  } // function pauseVid(track) {
+  //   track.pause();
+  //   audio_button.classList.remove('audio_pause');
+  //   audio_button.classList.add('audio_play');
+  //   // console.log('вызвался');
   // }
 
-  document.querySelector('.progress__bar' + key).addEventListener('click', setProgress);
-
-  function setProgress(e) {
-    const width = this.clientWidth,
-          clickX = e.offsetX,
-          duration = mySound.duration;
-    curtiem = clickX / width * duration;
-    mySound.currentTime = clickX / width * duration;
-  }
-
-  mySound.ontimeupdate = function (e) {
-    myFunction(e);
-  };
-
-  function myFunction(e) {
-    // console.log(e);
-    if (!document.querySelector('.progress__current' + key)) return;
-    const {
-      duration,
-      currentTime
-    } = e.srcElement,
-          progressPercent = currentTime / duration * 100;
-    document.querySelector('.progress__current' + key).style.width = `${progressPercent}%`;
-  }
-
-  function playVid(track) {
-    // console.log(track.readyState);
-    // recognizer.stop();
-    track.play();
-
-    track.onplay = function () {
-      // alert("The video has started to play");
-      audio_button.classList.remove('audio_play');
-      audio_button.classList.add('audio_pause');
-    };
-
-    track.onpause = function () {
-      curtiem = track.currentTime;
-    };
-
-    track.onended = function () {
-      // console.log("The audio has ended function axmedet");
-      audio_button.classList.remove('audio_pause');
-      audio_button.classList.add('audio_play');
-      track.currentTime, curtiem = 0;
-      let NoneStopMode = document.querySelector('#non_stop_mode_icon').classList.contains('icon-material_tw_NonStop');
-
-      if (NoneStopMode) {
-        // recognizer.stop();
-        let time = setTimeout(() => {
-          startVoise();
-          clearTimeout(time);
-        }, 900);
-      }
-    };
-
-    track.ontimeupdate = function (e) {
-      myFunction(e);
-    }; // function myFunction(e) {
-    //   // console.log(e);
-    //   if(!document.querySelector(progress__current)) return
-    //     const { duration, currentTime } = e.srcElement;
-    //     const progressPercent = (currentTime / duration) * 100;
-    //     document.querySelector(progress__current).style.width = `${progressPercent}%`;
-    // }
-
-  }
-
-  function pauseVid(track) {
-    track.pause();
-    audio_button.classList.remove('audio_pause');
-    audio_button.classList.add('audio_play'); // console.log('вызвался');
-  } // console.log(global.appleMode);
-  // mySound.play();
-  // if(/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-
-
-  if (global.appleMode) {
-    let b, i, c;
-    i = setInterval(() => {
-      if (localStorage.getItem('iphoneLocalVoise')) {
-        setListeerBtnPlay();
-        c = true;
-        clearInterval(i);
-        clearTimeout(b);
-        i = null;
-        b = null;
-      }
-    }, 100);
-
-    mySound.onloadedmetadata = function () {
-      let b = setTimeout(() => {
-        // console.log('clear nau');  
-        // clearInterval(i);
-        if (c !== true) setListeerBtnPlay();
-        clearInterval(i);
-        clearTimeout(b);
-        i = null;
-        b = null;
-      }, mySound.duration * 1000);
-    };
-
-    if (!openAll) {
-      let time = setTimeout(() => {
-        Object(_services_elemScroll__WEBPACK_IMPORTED_MODULE_2__["default"])(selLocal); // очистка
-
-        clearTimeout(time);
-        time = null;
-      }, global.mobaleMOde ? 400 : 700);
-    }
-  } else {
-    // кроме apple
-    // !openAll && playVid(mySound);
-    setListeerBtnPlay();
-
-    if (!openAll) {
-      let btnVoiseMute = document.querySelector('#voise_mudte_icon').classList.contains('icon-material_li_mute');
-
-      if (!btnVoiseMute) {
-        recognizer.stop();
-        playVid(mySound);
-      }
-
-      Object(_services_elemScroll__WEBPACK_IMPORTED_MODULE_2__["default"])(selLocal);
-    }
-  }
-
-  function setListeerBtnPlay() {
-    audio_button.addEventListener('click', e => {
-      e.preventDefault();
-
-      if (audio_button.classList.contains('audio_play')) {
-        mySound && mySound.pause();
-        mySound = new Audio(viosPath);
-
-        if (curtiem) {
-          mySound.currentTime = curtiem;
-          curtiem = null;
-        }
-
-        playVid(mySound);
-      } else {
-        pauseVid(mySound);
-      }
-    });
-  }
 
   let resal = true; // let setinte;
 
@@ -4609,40 +5228,42 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
 
     switch (error) {
       case 'no-speech':
-        Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_3__["openTextUserError"])('no_speech', 'Не молчи, слово молви добрый человек');
+        Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_4__["openTextUserError"])('no_speech', 'Не молчи, слово молви добрый человек');
         break;
 
       case 'not-allowed':
-        Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_3__["openTextUserError"])('not_allowed', 'Вы не дали доступ к микрофону!', 'https://knowledge.granatum.solutions/2020/04/02/access-to-the-camera-and-microphone-in-different-browsers/', 20000);
+        Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_4__["openTextUserError"])('not_allowed', 'Вы не дали доступ к микрофону!', 'https://knowledge.granatum.solutions/2020/04/02/access-to-the-camera-and-microphone-in-different-browsers/', 20000);
         break;
 
       case 'network':
-        Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_3__["openTextUserError"])('network', 'Отсутствует соединение к интернету!');
+        Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_4__["openTextUserError"])('network', 'Отсутствует соединение с интернетом!');
         break;
       // case 'aborted':
       //   openTextUserError('aborted','Что-то вызвало резкий обрыв записи!',null,4000);
       //   break;
     }
-  }; // recognizer.onsoundend = (event) => {
-  //   // console.log(event);
-  //   console.log("Sound has stopped being received");
-  // };
-  // recognizer.onspeechend = (e) => {
-  //   // console.log(e);
-  //   console.log("ты перестал говорить");
-  // };
+  };
 
+  recognizer.onsoundend = event => {
+    // console.log(event);
+    console.log('Sound has stopped being received');
+  };
+
+  recognizer.onspeechend = e => {
+    // console.log(e);
+    console.log('ты перестал говорить');
+  };
 
   recognizer.onend = () => {
-    console.log("Распознавание голоса закончено " + selStart + new Date().toLocaleTimeString());
+    console.log('Распознавание голоса закончено ' + selStart + new Date().toLocaleTimeString());
     stop();
-    Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_3__["removeAttributNadClass"])(); // console.log(localStorage.getItem(selLocal));
+    Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_4__["removeAttributNadClass"])(); // console.log(localStorage.getItem(selLocal));
 
     addAnswer(localStorage.getItem(selLocal)); // !global.mobaleMOde && openTextUserError('net','Распознование голоса завершилось!',null,3000);
 
     Object(_services_multiPlepresButtons__WEBPACK_IMPORTED_MODULE_0__["default"])(false, selStart); //был включен
 
-    if (params.textare.value.length < 3) Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_4__["default"])();
+    if (params.textare.value.length < 3) Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_5__["default"])();
     localStorage.removeItem('nevosprozwodi'); // console.log(!resal);
 
     if (!resal) return; // recognizer.start();
@@ -4653,17 +5274,17 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
 
   params.btnResp.addEventListener('click', respBtn); // open respons
 
-  params.remove.addEventListener('click', removebt); // clear this input user 
+  params.remove.addEventListener('click', removebt); // clear this input user
 
-  params.btnStartVoise.addEventListener('click', startVoise); // start listener vois 
+  params.btnStartVoise.addEventListener('click', startVoise); // start listener vois
 
-  params.letstop.addEventListener('click', stop); // stol listen vios 
+  params.letstop.addEventListener('click', stop); // stol listen vios
 
-  params.textare.addEventListener('input', textf); // input listeer 
+  params.textare.addEventListener('input', textf); // input listeer
 
   function respBtn(e) {
     e.preventDefault();
-    this.classList.toggle("active");
+    this.classList.toggle('active');
     let panel = this.nextElementSibling;
 
     if (panel.style.maxHeight) {
@@ -4681,13 +5302,13 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
     params.textare.innerHTML = '';
     localSet('');
     removeAnswer(selLocal);
-    Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_4__["default"])();
+    Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_5__["default"])();
   }
 
   function startVoise(event) {
     event && event.preventDefault();
     if (params.btnStartVoise.classList.contains('iconActive')) return; // stopVoiseSpeecAll();
-    //set localStorage Where Stay user 
+    //set localStorage Where Stay user
 
     localStorage.setItem('WhereStayUser', selLocal);
     params.material_fb.classList.add('icon-material_Pulsev');
@@ -4725,7 +5346,7 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
     }
 
     if (params.textare.value.length <= 1) {
-      Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_4__["default"])();
+      Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_5__["default"])();
     }
   } // let db= window.dbasce;
 
@@ -4734,7 +5355,7 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
     // let ap = selLocal.replace(/(\d)+/,'');
     let db = window.dbasce,
         ap = selLocalRepl,
-        transaction = db.transaction([ap], "readwrite"),
+        transaction = db.transaction([ap], 'readwrite'),
         store = transaction.objectStore(ap),
         request = store.delete(key); //
 
@@ -4752,7 +5373,7 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
 
     let db = window.dbasce,
         ap = selLocalRepl,
-        transaction = db.transaction([ap], "readonly"),
+        transaction = db.transaction([ap], 'readonly'),
         store = transaction.objectStore(ap),
         request = store.get(selLocal); //
 
@@ -4771,7 +5392,7 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
   function addAnswer(value) {
     let db = window.dbasce,
         ap = selLocalRepl,
-        transaction = db.transaction([ap], "readwrite"),
+        transaction = db.transaction([ap], 'readwrite'),
         store = transaction.objectStore(ap),
         person = {
       name: selLocal,
@@ -4795,7 +5416,7 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
 
   function saveResultTranscript(save = true, result, selLocal, oneSeveer = false) {
     //target result
-    Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_4__["default"])(); // automationSizeInput(textare);
+    Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_5__["default"])(); // automationSizeInput(textare);
 
     oneSeveer ? localStorage.setItem(selLocal, oneSeveer) : ''; // …то отображаем его содержимое в нашем редакторе
 
@@ -4816,6 +5437,13 @@ let app = (key, selStart, selLocal, selLocalRepl, openAll, viosPath = 'assets/vo
 
   function localSet(params) {
     localStorage.setItem(selLocal, Object(_services_chech__WEBPACK_IMPORTED_MODULE_1__["default"])(params).trim());
+  }
+
+  if (!openAll) {
+    let t = setTimeout(() => {
+      Object(_services_elemScroll__WEBPACK_IMPORTED_MODULE_3__["default"])(selLocal);
+      clearTimeout(t);
+    }, 1000);
   }
 }; //     // modeNonStop(params.btnStartVoise,params.letstop,selPahtVoid,openAll)
 
@@ -4885,7 +5513,7 @@ const dblClicChanje = () => {
   const button = document.querySelector('.stateBtn');
   const span = document.querySelector('#dotPuls');
   button.addEventListener('click', event => {
-    console.log('ктопка тут!');
+    // console.log('ктопка тут!');
     event.preventDefault();
     Object(_services_quetionAdd__WEBPACK_IMPORTED_MODULE_0__["default"])(false, false, false, false);
 
@@ -4927,10 +5555,10 @@ var _db_dowan_json__WEBPACK_IMPORTED_MODULE_2___namespace = /*#__PURE__*/__webpa
 // var Vector = require('vectorjs');
 
 const obj = {
-  'tickquestion': [],
-  'crossquestion': [],
-  'heartquestion': [],
-  'flowerquestion': []
+  tickquestion: [],
+  crossquestion: [],
+  heartquestion: [],
+  flowerquestion: []
 };
 let db;
 
@@ -4947,7 +5575,7 @@ const exportQuestion = dba => {
 
     function portDB(params) {
       // console.log(db);
-      let transaction = db.transaction([params], "readonly");
+      let transaction = db.transaction([params], 'readonly');
       let store = transaction.objectStore(params);
       let p = store.getAll(); // console.log(p);
 
@@ -5013,13 +5641,13 @@ const lostMicrophone = (sel = false) => {
   btnLostMicrophone.addEventListener('click', e => {
     e.preventDefault();
     let activeMicrapone = localStorage.getItem('WhereStayUser'),
-        p = document.querySelector("." + activeMicrapone);
+        p = document.querySelector('.' + activeMicrapone);
     if (!p) return console.log('тут пусто! Ты аухел ? в квадрате'); // console.log(p);
     // if(!p.children[0].classList.contains('iconActive')) return console.log('тут пусто! Ты аухел ? в кубе!');
 
     p.scrollIntoView({
-      block: "center",
-      behavior: "smooth"
+      block: 'start',
+      behavior: 'smooth'
     }); // list = null;
 
     activeMicrapone = null;
@@ -5089,11 +5717,11 @@ const mouseEventClickRithe = () => {
     evt = evt || window.event;
     evt.cancelBubble = true; // Показываем собственное контекстное меню
 
-    var menu = document.getElementById("contextMenuId");
-    var html = "";
-    html = "Меню для удаления ответов:";
+    var menu = document.getElementById('contextMenuId');
+    var html = '';
+    html = 'Меню для удаления ответов:';
     html += "<br><hr><a id='delOne' class='contextItem' href='#'>Удлаить эту секцию</a>";
-    html += "<br><a id='All' class='contextItem' href='#'>Удалить все ответы</a>"; //  
+    html += "<br><a id='All' class='contextItem' href='#'>Удалить все ответы</a>"; //
 
     const collection = {
       1: () => {
@@ -5110,19 +5738,24 @@ const mouseEventClickRithe = () => {
       }
     };
 
-    function d() {
+    function d(e) {
+      e.preventDefault();
       collection[type] && collection[type]();
     }
 
-    function delAll() {
+    function delAll(e) {
+      e.preventDefault();
+
       for (const key in collection) {
-        collection[key]();
+        collection[key](); //  widjetCircolLev();
+
+        Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_0__["default"])(undefined, true);
       }
     }
 
     function delOne(params) {
       let db = window.dbasce;
-      const transaction = db.transaction([params], "readwrite");
+      const transaction = db.transaction([params], 'readwrite');
       const store = transaction.objectStore(params); // const p =
 
       store.clear();
@@ -5134,15 +5767,15 @@ const mouseEventClickRithe = () => {
         });
       }
 
-      Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_0__["default"])();
+      Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_0__["default"])(undefined, true);
     } // Если есть что показать - показываем
 
 
     if (html) {
       menu.innerHTML = html;
-      menu.style.top = defPosition(evt).y + "px";
-      menu.style.left = defPosition(evt).x + "px";
-      menu.style.display = "";
+      menu.style.top = defPosition(evt).y + 'px';
+      menu.style.left = defPosition(evt).x + 'px';
+      menu.style.display = '';
       document.querySelector('#delOne').addEventListener('click', d);
       document.querySelector('#All').addEventListener('click', delAll);
     } // Блокируем всплывание стандартного браузерного меню
@@ -5158,14 +5791,14 @@ const mouseEventClickRithe = () => {
       object.addEventListener(event, handler, useCapture ? useCapture : false);
     } else if (object.attachEvent) {
       object.attachEvent('on' + event, handler);
-    } else console.log("Add handler is not supported");
+    } else console.log('Add handler is not supported');
   }
 
-  addHandler(document, "contextmenu", function () {
-    document.getElementById("contextMenuId").style.display = "none";
+  addHandler(document, 'contextmenu', function () {
+    document.getElementById('contextMenuId').style.display = 'none';
   });
-  addHandler(document, "click", function () {
-    document.getElementById("contextMenuId").style.display = "none";
+  addHandler(document, 'click', function () {
+    document.getElementById('contextMenuId').style.display = 'none';
   });
 };
 
@@ -5194,7 +5827,7 @@ const openAllQuestion = selector => {
       countClick = 0;
   iconMaterialOpenAll.removeEventListener('click', _services_LitlModules__WEBPACK_IMPORTED_MODULE_0__["scrollDown"]);
   iconMaterialOpenAll.addEventListener('click', startOpenCycle);
-  iconMaterialOpenAll.parentElement.setAttribute('data-tooltip', "Показать все");
+  iconMaterialOpenAll.parentElement.setAttribute('data-tooltip', 'Показать все');
   iconMaterialOpenAll.classList.remove('icon-material_scrollDown');
 
   function startOpenCycle(e) {
@@ -5203,11 +5836,10 @@ const openAllQuestion = selector => {
     Object(_services_openciCycle__WEBPACK_IMPORTED_MODULE_1__["default"])(selector);
     iconMaterialOpenAll.removeEventListener('click', startOpenCycle); // iconMaterialOpenAll = null;
 
-    iconMaterialOpenAll.parentElement.setAttribute('data-tooltip', "Прокрутить вниз");
-    iconMaterialOpenAll.classList.add('icon-material_scrollDown'); // iconMaterialOpenAll.parentElement.dataset = 
+    iconMaterialOpenAll.parentElement.setAttribute('data-tooltip', 'Прокрутить вниз');
+    iconMaterialOpenAll.classList.add('icon-material_scrollDown'); // iconMaterialOpenAll.parentElement.dataset =
 
-    iconMaterialOpenAll.addEventListener('click', _services_LitlModules__WEBPACK_IMPORTED_MODULE_0__["scrollDown"]);
-    console.log('============================');
+    iconMaterialOpenAll.addEventListener('click', _services_LitlModules__WEBPACK_IMPORTED_MODULE_0__["scrollDown"]); // console.log('============================');
   } // function scrollDown() {
   //   document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({block: "start", behavior: "smooth"});
   // }
@@ -5227,9 +5859,12 @@ const openAllQuestion = selector => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var core_js_modules_web_dom_collections_iterator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
-/* harmony import */ var core_js_modules_web_dom_collections_iterator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/widjetCircolLev */ "./src/js/services/widjetCircolLev.js");
+/* harmony import */ var core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
+/* harmony import */ var core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var core_js_modules_web_dom_collections_iterator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! core-js/modules/web.dom-collections.iterator */ "./node_modules/core-js/modules/web.dom-collections.iterator.js");
+/* harmony import */ var core_js_modules_web_dom_collections_iterator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_web_dom_collections_iterator__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/widjetCircolLev */ "./src/js/services/widjetCircolLev.js");
+
 
 
 
@@ -5237,10 +5872,10 @@ function openFile(db, openRequest) {
   const opneBtn = document.querySelector('#openFileBtn'),
         input = document.querySelector('#inputFile');
   const obj = {
-    'tickquestion': 0,
-    'crossquestion': 0,
-    'heartquestion': 0,
-    'flowerquestion': 0
+    tickquestion: 0,
+    crossquestion: 0,
+    heartquestion: 0,
+    flowerquestion: 0
   };
 
   const open = () => {
@@ -5254,7 +5889,7 @@ function openFile(db, openRequest) {
     checet('flowerquestion');
 
     function checet(params) {
-      const transaction = db.transaction([params], "readonly");
+      const transaction = db.transaction([params], 'readonly');
       const store = transaction.objectStore(params);
       const p = store.getAll(); // console.log(p);
 
@@ -5262,7 +5897,7 @@ function openFile(db, openRequest) {
         const lorf = p.result[0]; // console.log(lorf);
 
         if (lorf) {
-          // console.log(p.result[0]['value']); 
+          // console.log(p.result[0]['value']);
           obj[params] = true;
         } else {
           obj[params] = false;
@@ -5283,7 +5918,7 @@ function openFile(db, openRequest) {
 
   function lllll() {
     const div = document.createElement('div');
-    div.id = "myModal";
+    div.id = 'myModal';
     div.classList.add('modal');
     div.innerHTML = `
     <span class="clouse">×</span>
@@ -5318,6 +5953,7 @@ function openFile(db, openRequest) {
       btnYes.removeEventListener('click', yes);
       btnNoo.removeEventListener('click', noo);
       clouse.removeEventListener('click', noo);
+      document.removeEventListener('click', chengerEvent);
       document.removeEventListener('keydown', keydownFunct);
       document.querySelector('#myModal').remove();
     };
@@ -5328,10 +5964,18 @@ function openFile(db, openRequest) {
       }
     };
 
+    const chengerEvent = e => {
+      if (e.target.classList.contains('modal')) {
+        noo();
+        document.removeEventListener('click', chengerEvent);
+      }
+    };
+
     btnYes.addEventListener('click', yes);
     btnNoo.addEventListener('click', noo);
     clouse.addEventListener('click', noo);
     clouse.addEventListener('click', noo);
+    document.addEventListener('click', chengerEvent);
     document.addEventListener('keydown', keydownFunct);
   }
 
@@ -5356,7 +6000,7 @@ function openFile(db, openRequest) {
           const arr = Object.values(openRequest.result.objectStoreNames); // console.log(arr);
 
           if (arr.includes(key)) {
-            let transaction = db.transaction([key], "readwrite");
+            let transaction = db.transaction([key], 'readwrite');
             let store = transaction.objectStore(key);
 
             for (const iterator of element) {
@@ -5366,7 +6010,30 @@ function openFile(db, openRequest) {
         } // console.log('=1==1=1=1==23=1eoigjf.kmds,aDkoejfvn cmf');
 
 
-        Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_1__["default"])();
+        Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_2__["default"])(undefined, true);
+
+        if (document.querySelector('.tinRightIn')) {
+          // const pa = document.querySelector('.wrapper').classList[1].replace(/\d/,'');
+          // console.log(pa);
+          let db = window.dbasce,
+              ap = document.querySelector('.wrapper').classList[1].replace(/\d/, ''),
+              transaction = db.transaction([ap], 'readonly'),
+              store = transaction.objectStore(ap);
+          document.querySelectorAll('.wrapper').forEach((item, i) => {
+            let request = store.get(item.classList[1]);
+            console.dir(item.children[0].children[0].children[2]); // console.dir(item.classList[1]);
+
+            request.onsuccess = function () {
+              // console.log(p.source.name,p['result'][i]);
+              // console.log(request.result.value);
+              item.children[0].children[0].children[2].value = request.result.value; // compare(p.source.name,p['result']);
+              // if( p.source.name === 'flowerquestion'){
+              //   // console.log('=1=1=1=1=1==1==');
+              //   save('filename', obj);
+              // }
+            };
+          });
+        }
       };
     });
   };
@@ -5404,11 +6071,7 @@ const standardQuestions = (element, selectorCit = 'standart', key, openAll = fal
   div.innerHTML = `
       <div class="wrapper ${selectorCit}question${key}">
       <div class="wrapper_wrap">
-          <div class="row" style="
-          display: flex;
-          flex-direction: column;
-          gap: 13px;
-          ">
+          <div class="row" style="display: flex; flex-direction: column; gap: 13px;">
               <div class="quesion">
                 <div class="quesionNum">
                 ${key} из ${arlistLength}
@@ -5421,7 +6084,7 @@ const standardQuestions = (element, selectorCit = 'standart', key, openAll = fal
                 <div class="controls_one">
                 <div class="player-controls__item -xl js-play">
                   <div class="icon_control_voise">
-                    <i id="voise_aa${key}"class="audio_play">
+                    <i id="voise_aa${key}" class="audioTag audio_play" >
                     </i>
                   </div>
                 </div>
@@ -5443,15 +6106,13 @@ const standardQuestions = (element, selectorCit = 'standart', key, openAll = fal
              </button>
              ${global.mobaleMOde && !openAll ? ` 
              <div>
-             <button class="stateBtn stateBtn${key} crossBut" style="
-             margin: 15px 12px 0px 33px;
-               ">
+             <button class="stateBtn stateBtn${key} crossBut" style="margin: 0px 12px 0px 0px;">
              </button>
               </div>` : ''} 
             
            </div>
              
-           <textarea class="lasss lasss${key}" ></textarea>
+           <textarea class="lasss lasss${key}"></textarea>
         
           </div>
         
@@ -5486,7 +6147,7 @@ const standardQuestions = (element, selectorCit = 'standart', key, openAll = fal
     //     '.progress__current'+key,
     //     '#voise_aa'+key,
     //     element[2],
-    //     '.progress__bar'+key); 
+    //     '.progress__bar'+key);
 
     if (openAll) return;
     let stateBtnkey = document.querySelector('.stateBtn' + key);
@@ -5494,7 +6155,7 @@ const standardQuestions = (element, selectorCit = 'standart', key, openAll = fal
     stateBtnkey.addEventListener('click', e => appp(e));
 
     function appp(event) {
-      stateBtnkey.setAttribute('disabled', "true");
+      stateBtnkey.setAttribute('disabled', 'true');
       Object(_services_quetionAdd__WEBPACK_IMPORTED_MODULE_3__["default"])(false, undefined, event, false);
 
       function RandArray(array) {
@@ -5568,206 +6229,27 @@ const standardQuestions = (element, selectorCit = 'standart', key, openAll = fal
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _services_quetionAdd__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/quetionAdd */ "./src/js/services/quetionAdd.js");
-/* harmony import */ var _openAllQuestion__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./openAllQuestion */ "./src/js/modules/openAllQuestion.js");
-/* harmony import */ var _whereStay__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./whereStay */ "./src/js/modules/whereStay.js");
-/* harmony import */ var _lostMicrophone__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./lostMicrophone */ "./src/js/modules/lostMicrophone.js");
-/* harmony import */ var _services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../services/widjetCircolLev */ "./src/js/services/widjetCircolLev.js");
-/* harmony import */ var _services_LitlModules__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/LitlModules */ "./src/js/services/LitlModules.js");
-/* harmony import */ var _services_burgerMenuFunction__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/burgerMenuFunction */ "./src/js/services/burgerMenuFunction.js");
-/* harmony import */ var _services_clickIphone__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../services/clickIphone */ "./src/js/services/clickIphone.js");
-
-
-
-
-
-
-
+/* harmony import */ var _services_changeLevel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/changeLevel */ "./src/js/services/changeLevel.js");
 
 
 const startaStage = () => {
-  const btnsStart = document.querySelectorAll('.button'),
-        wrapperTutle = document.querySelector('.wrapperTutle'),
-        buttonHolder = document.querySelector('.buttonHolder'),
-        body = document.body,
-        html = document.documentElement;
+  const btnsStart = document.querySelectorAll('.button'); // wrapperTutle =  document.querySelector('.wrapperTutle'),
+  // buttonHolder =document.querySelector('.buttonHolder'),
+  // body = document.body,
+  // html = document.documentElement;
+
   let selectorListQ = [];
   btnsStart.forEach(item => {
     item.addEventListener('click', e => {
       e.preventDefault();
       selectorListQ = []; // console.log(e);
 
-      let targetBtn = e.target,
-          time,
-          navel = document.querySelector('#navel'),
-          burger_men = document.querySelector('#burger_men'),
-          btnBurge_men = document.querySelector('#btnBurge_men'),
-          spanBurger_man = document.querySelector('#spanBurger_man'),
-          overlowBurger = document.querySelector('#overlowBurger'),
-          sel = 'tick',
-          localSel = targetBtn.classList[2],
-          width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth),
-          btn = document.querySelector('.staet'); //  console.log(targetBtn);
-      //  console.log(localSel);
-
-      window.modeloderad = false;
-
-      if (document.querySelector('#navel').parentElement == document.querySelector('.time__segment')) {
-        document.querySelector('#burger_men').appendChild(document.querySelector('#navel'));
-      } //  const todoNumOne = document.querySelector('.tinRightIn');
-
-
-      if (!document.querySelector('.tinRightIn')) {
-        wrapperTutle.classList.add('pps');
-      } //  let time;
-
-
-      time = setTimeout(() => {
-        buttonHolder.classList.remove('hide');
-        btnsStart.forEach(span => {
-          span.nextElementSibling.classList.remove('textActiveLevel');
-        });
-        targetBtn.nextElementSibling.classList.add('textActiveLevel');
-        clearTimeout(time);
-        time = null;
-      }, 100); // selectorListQ = [];
-
-      switch (targetBtn.classList[2]) {
-        case 'tick':
-          selectorListQ = window.objectAllCor[localSel];
-          sel = 'tick';
-          break;
-
-        case 'cross':
-          selectorListQ = window.objectAllCor[localSel];
-          sel = 'cross';
-          break;
-
-        case 'heart':
-          selectorListQ = window.objectAllCor[localSel];
-          sel = 'heart';
-          break;
-
-        case 'flower':
-          selectorListQ = window.objectAllCor[localSel];
-          sel = 'flower';
-          break;
-      }
-
-      localSel = null; // if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && width <= 775) {
-
-      if (global.mobaleMOde && width <= 775) {
-        // //         // код для мобильных устройств
-        // if(!btn.classList.contains('hide')){
-        //   btn.classList.add('hide');
-        // }
-        if (navel.classList.contains('burger-menu_nav')) {
-          // бесполезная строка по моим предполоениям
-          // let menu = document.querySelector('.burger-menu');
-          document.querySelector('.burger-menu').classList.remove('burger-menu_active');
-        } else {
-          navel.classList.add('burger-menu_nav');
-          burger_men.classList.add('burger-menu');
-          btnBurge_men.classList.add('burger-menu_button');
-          spanBurger_man.classList.add('burger-menu_lines');
-          overlowBurger.classList.add('burger-menu_overlay');
-          Object(_services_burgerMenuFunction__WEBPACK_IMPORTED_MODULE_6__["default"])('.burger-menu');
-        }
-
-        if (!document.querySelector('.downloadedBtn').children[0].classList.contains('fabSegment')) {
-          Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_5__["createElementMobaile"])();
-        } // whereStay(document.querySelector('.wher'));
-        // togallVois(true);
-
-
-        Object(_lostMicrophone__WEBPACK_IMPORTED_MODULE_3__["default"])(true);
-        const iconMaterialOpenAll = document.querySelector('.icon-material_gp');
-        const elementList = document.querySelector('.gp_segment');
-        elementList.removeEventListener('click', _services_LitlModules__WEBPACK_IMPORTED_MODULE_5__["scrollDown"]);
-        elementList.removeEventListener('click', () => {
-          Object(_services_clickIphone__WEBPACK_IMPORTED_MODULE_7__["default"])(selectorListQ);
-        }, {
-          once: true
-        });
-        elementList.addEventListener('click', () => {
-          Object(_services_clickIphone__WEBPACK_IMPORTED_MODULE_7__["default"])(selectorListQ);
-        }, {
-          once: true
-        });
-        iconMaterialOpenAll.parentElement.setAttribute('data-tooltip', "Показать все");
-        iconMaterialOpenAll.classList.remove('icon-material_scrollDown');
-      } else {
-        if (btn.classList.contains('hide')) {
-          btn.classList.remove('hide');
-        }
-
-        Object(_openAllQuestion__WEBPACK_IMPORTED_MODULE_1__["default"])(sel);
-        buttonHolder.classList.add('holeOut');
-
-        if (navel.classList.contains('burger-menu_nav')) {
-          navel.classList.remove('burger-menu_nav');
-          burger_men.classList.remove('burger-menu');
-          btnBurge_men.classList.remove('burger-menu_button');
-          spanBurger_man.classList.remove('burger-menu_lines');
-          overlowBurger.classList.remove('burger-menu_overlay');
-        } // код для обычных устройств
-
-
-        buttonHolder.classList.remove('holeOut');
-        buttonHolder.classList.add('buttonHolderStatic');
-
-        if (!buttonHolder.classList.contains('bord')) {
-          buttonHolder.classList.add('hide');
-          buttonHolder.classList.add('bord');
-        }
-
-        buttonHolder.classList.add('gridAct');
-      }
-
-      Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_5__["removeLocalStoregeQuestion"])();
-      const boolean = global.mobaleMOde && width <= 775;
-
-      if (boolean) {
-        let list = document.querySelector('.wrapperPagestart'),
-            elem = document.querySelectorAll('.tinRightIn');
-
-        if (elem) {
-          elem = null;
-          list.replaceChildren(); // document.body.style.height  = height +'px'
-        }
-
-        wrapperTutle.classList.add('pps');
-      }
-
-      let time4 = setTimeout(() => {
-        if (!boolean) {
-          let list = document.querySelector('.wrapperPagestart'),
-              elem = document.querySelectorAll('.tinRightIn');
-
-          if (elem) {
-            elem = null;
-            list.replaceChildren(); // document.body.style.height  = height +'px'
-          }
-        }
-
-        localStorage.setItem('sel', sel); // window.selFoOpenAllquestion = sel;
-
-        Object(_services_quetionAdd__WEBPACK_IMPORTED_MODULE_0__["default"])(false, sel);
-
-        if (document.querySelector('[data-span2]')) {
-          document.querySelector('[data-span2]').classList.remove('opal');
-        }
-
-        Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_4__["default"])(sel);
-        clearTimeout(time4);
-        time4 = null;
-      }, boolean ? 400 : 800);
+      Object(_services_changeLevel__WEBPACK_IMPORTED_MODULE_0__["default"])(e.target, selectorListQ, btnsStart);
     });
   });
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (startaStage);
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -5805,12 +6287,12 @@ const togallVois = () => {
   // }, 1000);
 
   /*
-    non-stop: mute / on
-    voise: mute / on
-    voise  === on ? non-stop = job 
-    voise  === mute ? non-stop =  manual
-    click manual activate mode non-stop === true ? voise  = on 
-  */
+     non-stop: mute / on
+     voise: mute / on
+     voise  === on ? non-stop = job 
+     voise  === mute ? non-stop =  manual
+     click manual activate mode non-stop === true ? voise  = on 
+   */
   // режим нон стоп
 
 
@@ -5827,11 +6309,10 @@ const togallVois = () => {
       icon.voise.classList.remove('icon-material_li_mute');
       localStorage.removeItem('muteVoise');
     }
-  }); // режим без звука 
+  }); // режим без звука
 
   document.querySelector('#voise_mudte').addEventListener('click', e => {
-    e.preventDefault();
-    console.log(e);
+    e.preventDefault(); // console.log(e);
 
     if (icon.voise.classList.contains('icon-material_li_mute')) {
       icon.voise.classList.remove('icon-material_li_mute');
@@ -5862,10 +6343,10 @@ const toggalBurgerMenu = () => {
         btnMenu = document.querySelector('#burgerBtn');
   btnMenu.addEventListener('click', () => {
     downloadedWraper.classList.toggle('hide'); // if(downloadedWraper.getAttribute('data-togle') === 'clouse'){
-    //       downloadedWraper.setAttribute('data-togle', 'open')   
+    //       downloadedWraper.setAttribute('data-togle', 'open')
     //       downloadedWraper.classList.remove('hide')
     // } else {
-    //       downloadedWraper.setAttribute('data-togle', 'clouse')   
+    //       downloadedWraper.setAttribute('data-togle', 'clouse')
     //       downloadedWraper.classList.add('hide');
     //   }
   });
@@ -5887,7 +6368,7 @@ __webpack_require__.r(__webpack_exports__);
 const upWindowuser = () => {
   const div = document.createElement('div');
   div.classList.add('upButton');
-  div.innerHTML = `<a style="display: block;"  href="#"><img src="assets/img/Up.png" alt="up window"></a>`;
+  div.innerHTML = `<a style="display: block;"  href="#"><img src="assets/img/Up.png" alt="up" ></a>`;
   div.classList.add('hide');
   document.addEventListener('scroll', e => {
     const userwiz = window.pageYOffset;
@@ -5902,8 +6383,8 @@ const upWindowuser = () => {
   div.addEventListener('click', e => {
     e.preventDefault();
     document.querySelector('.wrapperTutle').scrollIntoView({
-      block: "center",
-      behavior: "smooth"
+      block: 'center',
+      behavior: 'smooth'
     });
   });
 };
@@ -5921,325 +6402,184 @@ const upWindowuser = () => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
-/* harmony import */ var core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _services_quetionAdd__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../services/quetionAdd */ "./src/js/services/quetionAdd.js");
-/* harmony import */ var _services_LitlModules__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/LitlModules */ "./src/js/services/LitlModules.js");
-/* harmony import */ var _services_burgerMenuFunction__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/burgerMenuFunction */ "./src/js/services/burgerMenuFunction.js");
-/* harmony import */ var _lostMicrophone__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./lostMicrophone */ "./src/js/modules/lostMicrophone.js");
-/* harmony import */ var _services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../services/widjetCircolLev */ "./src/js/services/widjetCircolLev.js");
-/* harmony import */ var _services_clickIphone__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../services/clickIphone */ "./src/js/services/clickIphone.js");
-
-
-
-
-
-
-
+/* harmony import */ var _services_whereSteyFunc__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../services/whereSteyFunc */ "./src/js/services/whereSteyFunc.js");
  // import clickIphone from '../services/clickIphone';
 
 let p = 0;
+let selectorListQ = [];
 
 const whereStay = (selector = false) => {
+  selectorListQ = [];
+
   try {
     if (selector) {
-      return selector.addEventListener('click', e => whereSt(e));
+      return selector.addEventListener('click', e => Object(_services_whereSteyFunc__WEBPACK_IMPORTED_MODULE_0__["default"])(e, selectorListQ, p));
     }
 
-    document.querySelector('#wheryIsty').addEventListener('click', e => whereSt(e));
+    document.querySelector('#wheryIsty').addEventListener('click', e => Object(_services_whereSteyFunc__WEBPACK_IMPORTED_MODULE_0__["default"])(e, selectorListQ, p));
   } catch (error) {
     console.error(error);
-  }
+  } //   function whereSt (e) {
+  //     // try {
+  //    e.preventDefault();
+  //    const sel =  localStorage.getItem('WhereStayUser');
+  //    console.log(sel);
+  //    if (!sel) {
+  //      //сделать уведомления с надписью "я не знаю где ты остановился"
+  //      return openTextUserError('notInfoWheyStay','я не знаю где ты остановился')
+  //    }
+  //    // если вопрос уже существует просто долистаем до нее
+  //    const selen = document.querySelector('.'+sel);
+  //    if(selen){
+  //      return selen.scrollIntoView({block: "start", behavior: "smooth"})
+  //    }
+  //    // if (sel) {
+  //    const selectorQuestionLevel =  sel.replace(/(question)(\d)+/,''); // узнаю к какой группе вопрос принадлежит
+  //    const numberQuestion =  sel.replace(/(tick|cross|heart|flower)(question)/,'')-1 ,
+  //    body = document.body,
+  //    html = document.documentElement,
+  //    width = Math.max( body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth ); // номер вопроса
+  //    let selectorQuestionopen;
+  //    console.log(selectorQuestionLevel);
+  //    // существуют ли вопросы
+  //    const selectorQues = document.querySelector(`.wrapper`);
+  //    // есть? да значит смотрим что вопросы с какой группы сущесвтуют : вопроов нету
+  //    selectorQues? selectorQuestionopen = selectorQues.classList[1].replace(/(question)(\d)+/,''):selectorQuestionopen = null;
+  //    // с какого вопроса начать
+  //    let index = document.querySelectorAll('.tinRightIn').length||0
+  //    // if(selectorQuestionopen === selectorQuestionLevel){
+  //    //   console.log('нажимать на изменения урвоня нет смысла!');
+  //    // }
+  //    // console.log(`${selectorQuestionopen} !== ${selectorQuestionLevel} || !${selectorQuestionopen}`);
+  //    if(selectorQuestionopen !== selectorQuestionLevel || !selectorQuestionopen){
+  //     // console.log('переклюать нужно для мобилок iphone!');
+  //   //    window.quetiAddn = true;
+  //             changeLevel(document.querySelector('.'+selectorQuestionLevel),selectorListQ,document.querySelectorAll('.button'));
+  //   if (global.mobaleMOde && width <= 775) {
+  //         name(numberQuestion,index);
+  //         console.log('переклюать надо для mobail!');
+  //       } else {
+  //         setTimeout(() => {
+  //           pcsicle();
+  //         },800 );
+  //       console.log('переклюать надо для PC!');
+  //      }
+  //           console.log(changeLevel);;
+  //    } else {
+  //     console.log('переключать не нужно ');
+  //      index = document.querySelectorAll('.tinRightIn').length-1;
+  //      global.mobaleMOde && width <= 775?name(numberQuestion,index):pcsicle();
+  //    }
+  // //  } catch (error) {console.error(error); }
+  //     function name(numberQuestion,index) {
+  //       let count = 0,
+  //       lengthIteration = 20,
+  //       element = document.querySelector('.modals_forms'),
+  //       selectorList = numberQuestion + 1
+  //       index = 0;
+  //       document.body.classList.add('overflowhidden')
+  //       element.classList.add('showModal');
+  //       console.log('вызов Name');
+  //       console.log(numberQuestion + ' numberQuestion');
+  //       console.log(selectorList+' selectorList');
+  //       chicle();
+  //       function chicle() {
+  //         console.log('вызов chicle');
+  //   // console.log(lengthIteration+' '+selectorListQ); если длина меньше 20 вопросов нужноцыкл запстить на мых обороткх
+  //         if (lengthIteration >= selectorListQ) {
+  //             lengthIteration = selectorListQ;
+  //         }
+  //         for ( index ; index < lengthIteration; index++) {
+  //           // debugger;
+  //           // console.log(++p);
+  //           p++;
+  //           console.log(p);
+  //           count++;
+  //           console.log(p+' p');
+  //           // console.log(count + ' count');
+  //           // console.log(index + ' index');
+  //           // console.log('llllllllllllllllllllllllll');
+  //           p == selectorList?
+  //           setTimeout(() => {
+  //             quetionAdd(false,false,false,false); //
+  //           }, 500)
+  //           :
+  //           setTimeout(() => {
+  //             quetionAdd(false,false,false,true);
+  //           }, 500)
+  //           // if(p == selectorListQ){
+  //           //   return console.log('все ребята!!!');
+  //           // }
+  //           // if(p == selectorList -1){
+  //           if(p == selectorList ){
+  //             console.log('шутка чтоли ?!');
+  //             // setTimeout(() => {
+  //             //   // document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({block: "start", behavior: "smooth"});
+  //             // }, 2000);
+  //               element.classList.remove('showModal');
+  //               document.body.classList.remove('overflowhidden');
+  //               p = 0;
+  //               return;
+  //           }
+  //         }
+  //         console.log(p +' p : selectorListQ '+ selectorList);
+  //         if(p >= selectorList) {
+  //           console.log('цыкл разрыв');
+  //           // console.log(p);
+  //           p = 0;
+  //           element.classList.remove('showModal');
+  //           document.body.classList.remove('overflowhidden');
+  //           // console.log(p);
+  //           index = 0;
+  //             return;
+  //             // console.log('все ребята!!!');
+  //         } else {
+  //           index = 0;
+  //           console.log('цыкл не разрыв');
+  //           let time3 = setTimeout(() => {
+  //             chicle();
+  //             clearTimeout(time3);
+  //             time3 = null;
+  //           }, 2500);
+  //       }
+  //       }
+  //       // lengthIteration += 20;
+  //       // index = count;
+  //       // if(count  >= selectorListQ ){
+  //       //     count = 0,
+  //       //     lengthIteration = 20,
+  //       //     index = 0;
+  //       //     return;
+  //       // } else {
+  //       //     let time3 = setTimeout(() => {
+  //       //     chicle();
+  //       //     clearTimeout(time3);
+  //       //     time3 = null;
+  //       //     }, 2500);
+  //       // }
+  //       // for (index ; index < numberQuestion; index++) {
+  //       //   // quetionAdd();
+  //       //   quetionAdd(false,false,false,true);
+  //       // }
+  //       // document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({block: "start", behavior: "smooth"});
+  //     }
+  //     function pcsicle() {
+  //       // console.log(index);
+  //       // console.log(numberQuestion);
+  //       for (index ; index < numberQuestion; index++) {
+  //         // quetionAdd();
+  //         // console.log('llllllllllllllllllllllllllllll');
+  //         quetionAdd(false,false,false,true);
+  //       }
+  //       setTimeout(() => {
+  //         document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({block: "start", behavior: "smooth"});
+  //       }, 5000);
+  //     }
+  //   }
 
-  function whereSt(e) {
-    // try {
-    e.preventDefault();
-    const sel = localStorage.getItem('WhereStayUser');
-
-    if (!sel) {
-      //сделать уведомления с надписью "я не знаю где ты остановился" 
-      return Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_2__["openTextUserError"])('notInfoWheyStay', 'я не знаю где ты остановился');
-    } // если вопрос уже существует просто долистаем до нее 
-
-
-    const selen = document.querySelector('.' + sel);
-
-    if (selen) {
-      return selen.scrollIntoView({
-        block: "start",
-        behavior: "smooth"
-      });
-    } // if (sel) {
-
-
-    const selectorQuestionLevel = sel.replace(/(question)(\d)+/, ''); // узнаю к какой группе вопрос принадлежит
-
-    const numberQuestion = sel.replace(/(tick|cross|heart|flower)(question)/, '') - 1,
-          body = document.body,
-          html = document.documentElement,
-          width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth); // номер вопроса 
-
-    let selectorQuestionopen; // существуют ли вопросы 
-
-    const selectorQues = document.querySelector(`.wrapper`); // есть? да значит смотрим что вопросы с какой группы сущесвтуют : вопроов нету
-
-    selectorQues ? selectorQuestionopen = selectorQues.classList[1].replace(/(question)(\d)+/, '') : selectorQuestionopen = null; // с какого вопроса начать 
-
-    let index = document.querySelectorAll('.tinRightIn').length || 0; // if(selectorQuestionopen === selectorQuestionLevel){
-    //   console.log('нажимать на изменения урвоня нет смысла!');
-    // }
-    // console.log(`${selectorQuestionopen} !== ${selectorQuestionLevel} || !${selectorQuestionopen}`);
-
-    if (selectorQuestionopen !== selectorQuestionLevel || !selectorQuestionopen) {
-      console.log('переклюать нужно для мобилок iphone!');
-      window.quetiAddn = true;
-
-      if (global.mobaleMOde && width <= 775) {
-        const btnsStart = document.querySelectorAll('.button'),
-              wrapperTutle = document.querySelector('.wrapperTutle'),
-              buttonHolder = document.querySelector('.buttonHolder'),
-              body = document.body,
-              html = document.documentElement;
-        let selectorListQ = [];
-        let targetBtn = document.querySelector('.' + selectorQuestionLevel),
-            time,
-            navel = document.querySelector('#navel'),
-            burger_men = document.querySelector('#burger_men'),
-            btnBurge_men = document.querySelector('#btnBurge_men'),
-            spanBurger_man = document.querySelector('#spanBurger_man'),
-            overlowBurger = document.querySelector('#overlowBurger'),
-            sel = 'tick',
-            localSel = targetBtn.classList[2],
-            width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth),
-            btn = document.querySelector('.staet');
-        window.modeloderad = false;
-
-        if (document.querySelector('#navel').parentElement == document.querySelector('.time__segment')) {
-          document.querySelector('#burger_men').appendChild(document.querySelector('#navel'));
-        } //  const todoNumOne = document.querySelector('.tinRightIn');
-
-
-        if (!document.querySelector('.tinRightIn')) {
-          wrapperTutle.classList.add('pps');
-        } //  let time;
-        //  time = setTimeout(() => {
-
-
-        buttonHolder.classList.remove('hide');
-        btnsStart.forEach(span => {
-          span.nextElementSibling.classList.remove('textActiveLevel');
-        });
-        targetBtn.nextElementSibling.classList.add('textActiveLevel'); // clearTimeout(time);
-        // time = null;
-        // }, 100);
-        // selectorListQ = [];
-
-        switch (targetBtn.classList[2]) {
-          case 'tick':
-            selectorListQ = window.objectAllCor[localSel];
-            sel = 'tick';
-            break;
-
-          case 'cross':
-            selectorListQ = window.objectAllCor[localSel];
-            sel = 'cross';
-            break;
-
-          case 'heart':
-            selectorListQ = window.objectAllCor[localSel];
-            sel = 'heart';
-            break;
-
-          case 'flower':
-            selectorListQ = window.objectAllCor[localSel];
-            sel = 'flower';
-            break;
-        }
-
-        localSel = null; // if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && width <= 775) {
-
-        if (global.mobaleMOde && width <= 775) {
-          // код для мобильных устройств
-          if (navel.classList.contains('burger-menu_nav')) {
-            // бесполезная строка по моим предположениям
-            // let menu = document.querySelector('.burger-menu');
-            document.querySelector('.burger-menu').classList.remove('burger-menu_active');
-          } else {
-            navel.classList.add('burger-menu_nav');
-            burger_men.classList.add('burger-menu');
-            btnBurge_men.classList.add('burger-menu_button');
-            spanBurger_man.classList.add('burger-menu_lines');
-            overlowBurger.classList.add('burger-menu_overlay');
-            Object(_services_burgerMenuFunction__WEBPACK_IMPORTED_MODULE_3__["default"])('.burger-menu');
-          }
-
-          if (!document.querySelector('.downloadedBtn').children[0].classList.contains('fabSegment')) {
-            createElementMobaile();
-          } // whereStay(document.querySelector('.wher'));
-          // togallVois(true);
-
-
-          Object(_lostMicrophone__WEBPACK_IMPORTED_MODULE_4__["default"])(true);
-          document.querySelector('.gp_segment').addEventListener('click', () => {
-            Object(_services_clickIphone__WEBPACK_IMPORTED_MODULE_6__["default"])(selectorListQ);
-          }, {
-            once: true
-          });
-        } else {
-          console.log('пиздося');
-        }
-
-        Object(_services_LitlModules__WEBPACK_IMPORTED_MODULE_2__["removeLocalStoregeQuestion"])(); //  let time4 = setTimeout(() => {
-
-        let list = document.querySelector('.wrapperPagestart'),
-            elem = document.querySelectorAll('.tinRightIn');
-
-        if (elem) {
-          elem = null;
-          list.replaceChildren(); // document.body.style.height  = height +'px'
-        }
-
-        localStorage.setItem('sel', sel); // window.selFoOpenAllquestion = sel;
-
-        Object(_services_quetionAdd__WEBPACK_IMPORTED_MODULE_1__["default"])(false, sel);
-
-        if (document.querySelector('[data-span2]')) {
-          document.querySelector('[data-span2]').classList.remove('opal');
-        }
-
-        Object(_services_widjetCircolLev__WEBPACK_IMPORTED_MODULE_5__["default"])(sel); // clearTimeout(time4);
-        // time4 = null;
-        // }, 800);  
-      } else {
-        console.log('переклюать надо для PC!');
-        const eventMous = new MouseEvent("click", {
-          view: window,
-          bubbles: true,
-          cancelable: true
-        });
-        document.querySelector(`.${selectorQuestionLevel}`).dispatchEvent(eventMous);
-      } // document.querySelector(`.${selectorQuestionLevel}`).click();
-
-
-      index = 0; //  setTimeout(() => {
-
-      if (global.mobaleMOde && width <= 775) {
-        name(numberQuestion, index);
-        console.log('');
-      } else {
-        console.log('PC');
-        setTimeout(() => {
-          pcsicle();
-        }, 800);
-      } // name();
-      // clickIphone(numberQuestion);
-      //  }, 5000); 
-
-    } else {
-      console.log('эпереключать не нужно ');
-      index = document.querySelectorAll('.tinRightIn').length - 1;
-      global.mobaleMOde && width <= 775 ? name(numberQuestion, index) : pcsicle();
-    } //  } catch (error) {console.error(error); }
-
-
-    function name(numberQuestion, index) {
-      let count = 0,
-          lengthIteration = 20,
-          element = document.querySelector('.modals_forms'),
-          selectorListQ = numberQuestion + 1;
-      index = 0;
-      element.classList.add('showModal');
-      chicle();
-
-      function chicle() {
-        // console.log(lengthIteration+' '+selectorListQ);
-        // if (lengthIteration >= selectorListQ) {
-        //     lengthIteration = selectorListQ;
-        // }
-        for (index; index < lengthIteration; index++) {
-          // console.log(++p);
-          p++;
-          count++;
-          console.log(p + ' p');
-          console.log(count + ' count');
-          console.log(index + ' index');
-          console.log('llllllllllllllllllllllllll');
-          Object(_services_quetionAdd__WEBPACK_IMPORTED_MODULE_1__["default"])(false, false, false, true); // if(p == selectorListQ){
-          //   return console.log('все ребята!!!');
-          // }
-
-          if (p == selectorListQ - 1) {
-            console.log('шутка чтоли ?!');
-            document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({
-              block: "start",
-              behavior: "smooth"
-            });
-            element.classList.remove('showModal');
-            p = 0;
-            return;
-          }
-        }
-
-        if (p >= selectorListQ) {
-          console.log('цыкл разрыв');
-          console.log(p);
-          p = 0;
-          console.log(p);
-          index = 0;
-          return console.log('все ребята!!!');
-        } else {
-          index = 0;
-          console.log('цыкл не разрыв');
-          let time3 = setTimeout(() => {
-            chicle();
-            clearTimeout(time3);
-            time3 = null;
-          }, 2500);
-        }
-      } // lengthIteration += 20;
-      // index = count;
-      // if(count  >= selectorListQ ){
-      //     count = 0,
-      //     lengthIteration = 20,
-      //     index = 0;
-      //     return;
-      // } else {
-      //     let time3 = setTimeout(() => {
-      //     chicle();
-      //     clearTimeout(time3);
-      //     time3 = null;
-      //     }, 2500);
-      // }
-      // for (index ; index < numberQuestion; index++) {
-      //   // quetionAdd();
-      //   quetionAdd(false,false,false,true);
-      // }
-      // document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({block: "start", behavior: "smooth"});
-
-    }
-
-    function pcsicle() {
-      console.log(index);
-      console.log(numberQuestion);
-
-      for (index; index < numberQuestion; index++) {
-        // quetionAdd();
-        console.log('llllllllllllllllllllllllllllll');
-        Object(_services_quetionAdd__WEBPACK_IMPORTED_MODULE_1__["default"])(false, false, false, true);
-      }
-
-      setTimeout(() => {
-        document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({
-          block: "start",
-          behavior: "smooth"
-        });
-      }, 5000);
-    }
-  }
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (whereStay);
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -6293,7 +6633,7 @@ function stopVoiseSpeecAll() {
 function createElementMobaile() {
   let div = document.createElement('div');
   div.classList.add('fabSegment', 'alerot');
-  div.style.cssText = "align-items: center;";
+  div.style.cssText = 'align-items: center;';
   div.innerHTML = `
           <ul class="fab-buttons_Segment alerot">
             <li class="fab-buttons__item_Segment">
@@ -6359,7 +6699,7 @@ function createElementMobaile() {
           </ul>
           </span>
           `;
-  const sp2 = document.querySelector(".btnFile");
+  const sp2 = document.querySelector('.btnFile');
   const parentDiv = sp2.parentNode;
   parentDiv.insertBefore(div, sp2);
   div = null;
@@ -6426,9 +6766,9 @@ function removeLocalStoregeQuestion() {
 }
 
 function scrollDown() {
-  document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({
-    block: "start",
-    behavior: "smooth"
+  return document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({
+    block: 'start',
+    behavior: 'smooth'
   });
 }
 
@@ -6474,8 +6814,11 @@ function burgerMenu(selector) {
     if (menu.classList.contains('burger-menu_active')) {
       menu.classList.remove('burger-menu_active');
       spaner.classList.remove('opal'); // document.querySelector('.burger-menu_lines').style = 'opacity: 1;'
+
+      document.querySelector('body').style = 'overflow: visible;';
     } else {
-      // document.querySelector('.burger-menu_lines').style = 'opacity: 0;'
+      document.querySelector('body').style = 'overflow: hidden;'; // document.querySelector('.burger-menu_lines').style = 'opacity: 0;'
+
       menu.classList.add('burger-menu_active');
       spaner.classList.add('opal');
     } // if (menu.classList.contains('burger-menu_active')) {
@@ -6488,6 +6831,212 @@ function burgerMenu(selector) {
 }
 
 /* harmony default export */ __webpack_exports__["default"] = (burgerMenu);
+
+/***/ }),
+
+/***/ "./src/js/services/changeLevel.js":
+/*!****************************************!*\
+  !*** ./src/js/services/changeLevel.js ***!
+  \****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _modules_openAllQuestion__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/openAllQuestion */ "./src/js/modules/openAllQuestion.js");
+/* harmony import */ var _LitlModules__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./LitlModules */ "./src/js/services/LitlModules.js");
+/* harmony import */ var _burgerMenuFunction__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./burgerMenuFunction */ "./src/js/services/burgerMenuFunction.js");
+/* harmony import */ var _quetionAdd__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./quetionAdd */ "./src/js/services/quetionAdd.js");
+/* harmony import */ var _widjetCircolLev__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./widjetCircolLev */ "./src/js/services/widjetCircolLev.js");
+/* harmony import */ var _whereStCicle__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./whereStCicle */ "./src/js/services/whereStCicle.js");
+// import lostMicrophone from "../modules/lostMicrophone";
+
+
+ // import clickIphone from "./clickIphone";
+
+
+
+
+const wrapperTutle = document.querySelector('.wrapperTutle'),
+      buttonHolder = document.querySelector('.buttonHolder'),
+      body = document.body,
+      html = document.documentElement;
+
+const changeLevel = (targetBtn, selectorListQ, btnsStart) => {
+  let time,
+      navel = document.querySelector('#navel'),
+      burger_men = document.querySelector('#burger_men'),
+      btnBurge_men = document.querySelector('#btnBurge_men'),
+      spanBurger_man = document.querySelector('#spanBurger_man'),
+      overlowBurger = document.querySelector('#overlowBurger'),
+      sel = 'tick',
+      localSel = targetBtn.classList[2],
+      width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth),
+      btn = document.querySelector('.staet'); //  console.log(targetBtn);
+  //  console.log(localSel);
+
+  window.modeloderad = false;
+
+  if (document.querySelector('#navel').parentElement == document.querySelector('.time__segment')) {
+    document.querySelector('#burger_men').appendChild(document.querySelector('#navel'));
+  } //  const todoNumOne = document.querySelector('.tinRightIn');
+
+
+  if (!document.querySelector('.tinRightIn')) {
+    wrapperTutle.classList.add('pps');
+  } //  let time;
+
+
+  time = setTimeout(() => {
+    buttonHolder.classList.remove('hide');
+    btnsStart.forEach(span => {
+      span.nextElementSibling.classList.remove('textActiveLevel');
+    });
+    targetBtn.nextElementSibling.classList.add('textActiveLevel');
+    clearTimeout(time);
+    time = null;
+  }, 100); // selectorListQ = [];
+
+  switch (targetBtn.classList[2]) {
+    case 'tick':
+      selectorListQ = window.objectAllCor[localSel];
+      sel = 'tick';
+      break;
+
+    case 'cross':
+      selectorListQ = window.objectAllCor[localSel];
+      sel = 'cross';
+      break;
+
+    case 'heart':
+      selectorListQ = window.objectAllCor[localSel];
+      sel = 'heart';
+      break;
+
+    case 'flower':
+      selectorListQ = window.objectAllCor[localSel];
+      sel = 'flower';
+      break;
+  }
+
+  localSel = null; // if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && width <= 775) {
+
+  if (global.mobaleMOde && width <= 775) {
+    // //         // код для мобильных устройств
+    // if(!btn.classList.contains('hide')){
+    //   btn.classList.add('hide');
+    // }
+    if (navel.classList.contains('burger-menu_nav')) {
+      // бесполезная строка по моим предполоениям
+      // let menu = document.querySelector('.burger-menu');s
+      setTimeout(() => {
+        document.querySelector('.burger-menu').classList.remove('burger-menu_active');
+        body.style = 'overflow: visible;';
+      }, 700);
+    } else {
+      navel.classList.add('burger-menu_nav');
+      burger_men.classList.add('burger-menu');
+      btnBurge_men.classList.add('burger-menu_button');
+      spanBurger_man.classList.add('burger-menu_lines');
+      overlowBurger.classList.add('burger-menu_overlay');
+      Object(_burgerMenuFunction__WEBPACK_IMPORTED_MODULE_2__["default"])('.burger-menu');
+    }
+
+    if (!document.querySelector('.downloadedBtn').children[0].classList.contains('fabSegment')) {
+      Object(_LitlModules__WEBPACK_IMPORTED_MODULE_1__["createElementMobaile"])();
+    } // whereStay(document.querySelector('.wher'));
+    // togallVois(true);
+    //  lostMicrophone(true);
+
+
+    const iconMaterialOpenAll = document.querySelector('.icon-material_gp');
+    const elementList = document.querySelector('.gp_segment'); //  const index = CountElementIsDOM();
+
+    elementList.removeEventListener('click', _LitlModules__WEBPACK_IMPORTED_MODULE_1__["scrollDown"]);
+    elementList.removeEventListener('click', () => {
+      Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_5__["mobailCle"])(Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_5__["CountElementIsDOM"])(), selectorListQ - Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_5__["CountElementIsDOM"])(), true);
+    }, {
+      once: true
+    });
+    elementList.addEventListener('click', () => {
+      Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_5__["mobailCle"])(Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_5__["CountElementIsDOM"])(), selectorListQ - Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_5__["CountElementIsDOM"])(), true);
+    }, {
+      once: true
+    }); //  elementList.removeEventListener('click',()=>{clickIphone(selectorListQ)}, {once:true})
+    //  elementList.addEventListener('click',()=>{clickIphone(selectorListQ)}, {once:true});
+
+    iconMaterialOpenAll.parentElement.setAttribute('data-tooltip', 'Показать все');
+    iconMaterialOpenAll.classList.remove('icon-material_scrollDown');
+  } else {
+    if (btn.classList.contains('hide')) {
+      btn.classList.remove('hide');
+    }
+
+    Object(_modules_openAllQuestion__WEBPACK_IMPORTED_MODULE_0__["default"])(sel);
+    buttonHolder.classList.add('holeOut');
+
+    if (navel.classList.contains('burger-menu_nav')) {
+      navel.classList.remove('burger-menu_nav');
+      burger_men.classList.remove('burger-menu');
+      btnBurge_men.classList.remove('burger-menu_button');
+      spanBurger_man.classList.remove('burger-menu_lines');
+      overlowBurger.classList.remove('burger-menu_overlay');
+    } // код для обычных устройств
+
+
+    buttonHolder.classList.remove('holeOut');
+    buttonHolder.classList.add('buttonHolderStatic');
+
+    if (!buttonHolder.classList.contains('bord')) {
+      buttonHolder.classList.add('hide');
+      buttonHolder.classList.add('bord');
+    }
+
+    buttonHolder.classList.add('gridAct');
+  }
+
+  Object(_LitlModules__WEBPACK_IMPORTED_MODULE_1__["removeLocalStoregeQuestion"])();
+  const boolean = global.mobaleMOde && width <= 775;
+
+  if (boolean) {
+    let list = document.querySelector('.wrapperPagestart'),
+        elem = document.querySelectorAll('.tinRightIn');
+
+    if (elem) {
+      elem = null;
+      list.replaceChildren(); // document.body.style.height  = height +'px'
+    }
+
+    wrapperTutle.classList.add('pps');
+  }
+
+  let time4 = setTimeout(() => {
+    if (!boolean) {
+      let list = document.querySelector('.wrapperPagestart'),
+          elem = document.querySelectorAll('.tinRightIn');
+
+      if (elem) {
+        elem = null;
+        list.replaceChildren(); // document.body.style.height  = height +'px'
+      }
+    }
+
+    localStorage.setItem('sel', sel); // window.selFoOpenAllquestion = sel;
+
+    Object(_quetionAdd__WEBPACK_IMPORTED_MODULE_3__["default"])(false, sel);
+
+    if (document.querySelector('[data-span2]')) {
+      document.querySelector('[data-span2]').classList.remove('opal');
+    }
+
+    Object(_widjetCircolLev__WEBPACK_IMPORTED_MODULE_4__["default"])(sel);
+    clearTimeout(time4);
+    time4 = null;
+  }, boolean ? 400 : 800);
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (changeLevel);
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -6514,73 +7063,6 @@ const chech = text => {
 
 /***/ }),
 
-/***/ "./src/js/services/clickIphone.js":
-/*!****************************************!*\
-  !*** ./src/js/services/clickIphone.js ***!
-  \****************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _quetionAdd__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./quetionAdd */ "./src/js/services/quetionAdd.js");
-/* harmony import */ var _LitlModules__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./LitlModules */ "./src/js/services/LitlModules.js");
-
-
-
-let clickIphone = selectorListQ => {
-  let count = 0,
-      lengthIteration = 10,
-      element = document.querySelector('.modals_forms'),
-      iconMaterialOpenAll = document.querySelector('.icon-material_gp'),
-      index = document.querySelectorAll('.tinRightIn').length !== 0 ? document.querySelectorAll('.tinRightIn').length : 0;
-  element.classList.add('showModal');
-  chicle();
-
-  function chicle() {
-    if (lengthIteration >= selectorListQ) {
-      lengthIteration = selectorListQ;
-    }
-
-    for (index; index < lengthIteration; index++) {
-      count++;
-      Object(_quetionAdd__WEBPACK_IMPORTED_MODULE_0__["default"])(false, false, false, true);
-
-      if (index == selectorListQ - 2) {
-        document.querySelector('.wrapperPagestart').lastElementChild.scrollIntoView({
-          block: "start",
-          behavior: "smooth"
-        });
-        element.classList.remove('showModal');
-      }
-    }
-
-    lengthIteration += 20;
-    index = count;
-
-    if (count >= selectorListQ) {
-      // const iconMaterialOpenAll = document.querySelector('.icon-material_gp');
-      const elementList = document.querySelector('.gp_segment');
-      iconMaterialOpenAll.parentElement.setAttribute('data-tooltip', "Прокрутить вниз");
-      iconMaterialOpenAll.classList.add('icon-material_scrollDown'); // iconMaterialOpenAll.parentElement.dataset = 
-
-      elementList.addEventListener('click', _LitlModules__WEBPACK_IMPORTED_MODULE_1__["scrollDown"]);
-      count = 0, lengthIteration = 10, index = 0;
-      return;
-    } else {
-      let time3 = setTimeout(() => {
-        chicle();
-        clearTimeout(time3);
-        time3 = null;
-      }, 1500);
-    }
-  }
-};
-
-/* harmony default export */ __webpack_exports__["default"] = (clickIphone);
-
-/***/ }),
-
 /***/ "./src/js/services/elemScroll.js":
 /*!***************************************!*\
   !*** ./src/js/services/elemScroll.js ***!
@@ -6595,8 +7077,8 @@ const elemScroll = selector => {
   let element = document.querySelector(`.${selector}`); // body.style.height = body.offsetHeight +350+"px";
 
   element.scrollIntoView({
-    block: "start",
-    behavior: "smooth"
+    block: 'start',
+    behavior: 'smooth'
   }); // console.log('alalalaalalalalla');
   // body = null;
 
@@ -6626,36 +7108,36 @@ let db;
 
 const indexedDBLocal = () => {
   function indexedDBOk() {
-    return "indexedDB" in window;
+    return 'indexedDB' in window;
   } //No support? Go in the corner and pout.
 
 
   if (!indexedDBOk) return;
-  let openRequest = indexedDB.open("idarticle_people3", 1);
+  let openRequest = indexedDB.open('idarticle_people3', 1);
 
   openRequest.onupgradeneeded = function (e) {
     let thisDB = e.target.result;
 
-    if (!thisDB.objectStoreNames.contains("tickquestion")) {
-      thisDB.createObjectStore("tickquestion", {
+    if (!thisDB.objectStoreNames.contains('tickquestion')) {
+      thisDB.createObjectStore('tickquestion', {
         keyPath: 'name'
       });
     }
 
-    if (!thisDB.objectStoreNames.contains("crossquestion")) {
-      thisDB.createObjectStore("crossquestion", {
+    if (!thisDB.objectStoreNames.contains('crossquestion')) {
+      thisDB.createObjectStore('crossquestion', {
         keyPath: 'name'
       });
     }
 
-    if (!thisDB.objectStoreNames.contains("heartquestion")) {
-      thisDB.createObjectStore("heartquestion", {
+    if (!thisDB.objectStoreNames.contains('heartquestion')) {
+      thisDB.createObjectStore('heartquestion', {
         keyPath: 'name'
       });
     }
 
-    if (!thisDB.objectStoreNames.contains("flowerquestion")) {
-      thisDB.createObjectStore("flowerquestion", {
+    if (!thisDB.objectStoreNames.contains('flowerquestion')) {
+      thisDB.createObjectStore('flowerquestion', {
         keyPath: 'name'
       });
     }
@@ -6785,7 +7267,6 @@ const openciCycle = localSel => {
 
     case 'cross':
       selectorListQ = window.objectAllCor[localSel];
-      ;
       break;
 
     case 'heart':
@@ -6831,13 +7312,15 @@ const openciCycle = localSel => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _modules_standardQuestions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/standardQuestions */ "./src/js/modules/standardQuestions.js");
-/* harmony import */ var _db_dbArr_json__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../db/dbArr.json */ "./src/js/db/dbArr.json");
-var _db_dbArr_json__WEBPACK_IMPORTED_MODULE_1___namespace = /*#__PURE__*/__webpack_require__.t(/*! ../db/dbArr.json */ "./src/js/db/dbArr.json", 1);
-/* harmony import */ var _services_LitlModules__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/LitlModules */ "./src/js/services/LitlModules.js");
-// import voiceQuestion from "./voiceQuestion";
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _voiceQuestion__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./voiceQuestion */ "./src/js/services/voiceQuestion.js");
+/* harmony import */ var _modules_standardQuestions__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../modules/standardQuestions */ "./src/js/modules/standardQuestions.js");
+/* harmony import */ var _db_dbArr_json__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../db/dbArr.json */ "./src/js/db/dbArr.json");
+var _db_dbArr_json__WEBPACK_IMPORTED_MODULE_2___namespace = /*#__PURE__*/__webpack_require__.t(/*! ../db/dbArr.json */ "./src/js/db/dbArr.json", 1);
+/* harmony import */ var _services_LitlModules__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/LitlModules */ "./src/js/services/LitlModules.js");
 
 
+
+ // import { Promise } from "core-js";
 
 let counter = 0,
     arlist = [],
@@ -6855,26 +7338,29 @@ const quetionAdd = (vioseSkib, sel, e, prop = false) => {
 
     switch (sel) {
       case 'tick':
-        arlist = _db_dbArr_json__WEBPACK_IMPORTED_MODULE_1__['styles'][0];
+        arlist = _db_dbArr_json__WEBPACK_IMPORTED_MODULE_2__['styles'][0];
         sel = 'tick';
         break;
 
       case 'cross':
-        arlist = _db_dbArr_json__WEBPACK_IMPORTED_MODULE_1__['styles'][1];
+        arlist = _db_dbArr_json__WEBPACK_IMPORTED_MODULE_2__['styles'][1];
         sel = 'cross';
         break;
 
       case 'heart':
-        arlist = _db_dbArr_json__WEBPACK_IMPORTED_MODULE_1__['styles'][2];
+        arlist = _db_dbArr_json__WEBPACK_IMPORTED_MODULE_2__['styles'][2];
         sel = 'heart';
         break;
 
       case 'flower':
-        arlist = _db_dbArr_json__WEBPACK_IMPORTED_MODULE_1__['styles'][3];
+        arlist = _db_dbArr_json__WEBPACK_IMPORTED_MODULE_2__['styles'][3];
         sel = 'flower';
         break;
     }
   }
+
+  const localMute = localStorage.getItem('muteVoise'),
+        icon_material_li = document.querySelector('.icon-material_li');
 
   if (sel) {
     seler = sel;
@@ -6882,126 +7368,11 @@ const quetionAdd = (vioseSkib, sel, e, prop = false) => {
 
   if (document.querySelectorAll('.tinRightIn').length !== 0 && window.modeloderad) {
     counter = document.querySelectorAll('.tinRightIn').length;
-  } // if (window.quetiAddn) {
-  //   window.quetiAddn = false
-  //   return ''
-  // }
-  // console.log(!prop);
-
-
-  let NoneStopMode = document.querySelector('#non_stop_mode_icon').classList.contains('icon-material_tw_NonStop');
-
-  if (NoneStopMode) {
-    // document.querySelector('.pause').click();
-    const recognizer = global.recog;
-    recognizer.stop();
-    document.querySelectorAll('.start-stop').forEach(item => {
-      item.classList.remove('btnDeactiv');
-      item.removeAttribute('disabled');
-    });
   }
 
-  let time = setTimeout(() => {
-    if (!prop) {
-      // октрываем все !нет 
-      const localMute = localStorage.getItem('muteVoise'),
-            icon_material_li = document.querySelector('.icon-material_li'); // if(/Macintosh|iPhone|iPad|iPod/i.test(navigator.userAgent) && !localMute && !icon_material_li.classList.contains('icon-material_li_mute')){ // мобилка 
-
-      if (global.appleMode && !localMute && !icon_material_li.classList.contains('icon-material_li_mute')) {
-        // мобилка 
-        // console.log('прошел !');
-        if (audio) {
-          let audio_button = document.querySelector(`#voise_aa${counter}`);
-          audio_button.classList.remove('audio_pause');
-          audio_button.classList.add('audio_play');
-          audio.pause();
-        }
-
-        audio = new Audio(arlist[counter - 1][2]);
-        let set = setTimeout(() => {
-          let countThis = counter;
-          countThis + 1; // let btn = document.querySelector();
-
-          playVid(audio, `#voise_aa${countThis}`, `.progress__current${countThis}`, `.progress__bar${countThis}`, countThis);
-          clearTimeout(set);
-          set = null;
-        }, 1000); // console.log(`#voise_aa${countThis}`);
-
-        function playVid(track, audio_but, key, progress__bar, countThis) {
-          track.play();
-          localStorage.setItem('iphoneLocalVoise', '');
-          let audio_button = document.querySelector(audio_but);
-          audio_button.addEventListener('click', pauseEL);
-
-          function pauseEL() {
-            if (!audio_button.classList.contains('audio_play')) {
-              track.pause();
-              localStorage.setItem('iphoneLocalVoise', false);
-              audio_button.classList.remove('audio_pause');
-              audio_button.classList.add('audio_play');
-              track.currentTime = 0;
-            }
-
-            audio_button.removeEventListener('click', pauseEL);
-          }
-
-          track.onpause = () => {
-            audio_button.classList.remove('audio_pause');
-            audio_button.classList.add('audio_play');
-            audio_button.removeEventListener('click', pauseEL);
-          };
-
-          track.onplay = function () {
-            audio_button.classList.remove('audio_play');
-            audio_button.classList.add('audio_pause');
-          };
-
-          track.onended = function () {
-            audio_button.classList.remove('audio_pause');
-            audio_button.classList.add('audio_play');
-            track.currentTime = 0;
-            audio_button.removeEventListener('click', pauseEL);
-
-            if (NoneStopMode) {
-              let tiem = setTimeout(() => {
-                document.querySelector('.start-stop' + countThis).click();
-                clearTimeout(tiem);
-              }, 900);
-            }
-          };
-
-          track.ontimeupdate = function (e) {
-            myFunction(e);
-          };
-
-          function myFunction(e) {
-            // console.log(e);
-            const {
-              duration,
-              currentTime
-            } = e.srcElement;
-            const progressPercent = currentTime / duration * 100;
-            document.querySelector(key).style.width = `${progressPercent}%`;
-          }
-        }
-      }
-    }
-
-    clearTimeout(time);
-    time = null;
-  }, 0); // работает 
-  // const audio = new Audio(arlist[counter][2]);
-  // // audio.autoplay = true;
-  // setTimeout(() => {
-  //   // alert('artr1')
-  //   audio.play();
-  //   // audio.play();
-  //   // audio.play();
-  // }, 1000);
-
   if (counter > arlist.length - 1) {
-    arlist = []; // console.log("ну все !");
-
+    arlist = [];
+    console.log('ну все !');
     return;
   }
 
@@ -7018,7 +7389,13 @@ const quetionAdd = (vioseSkib, sel, e, prop = false) => {
     wrapperTutle.classList.remove('pps');
   }
 
-  Object(_modules_standardQuestions__WEBPACK_IMPORTED_MODULE_0__["default"])(arlist[counter], seler, counter + 1, prop, arlist.length);
+  Object(_modules_standardQuestions__WEBPACK_IMPORTED_MODULE_1__["default"])(arlist[counter], seler, counter + 1, prop, arlist.length);
+
+  if (global.appleMode) {
+    //  let key = counter;
+    Object(_voiceQuestion__WEBPACK_IMPORTED_MODULE_0__["default"])(counter + 1, seler + 'question' + counter, arlist[counter][2], prop, 'quAdd');
+  }
+
   counter++;
 };
 
@@ -7037,7 +7414,7 @@ const quetionAdd = (vioseSkib, sel, e, prop = false) => {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 function recognation() {
-  const recognizer = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)(); // const recognizer =  new SpeechRecognition(); 
+  const recognizer = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)(); // const recognizer =  new SpeechRecognition();
   // Ставим опцию, чтобы распознавание началось ещё до того, как пользователь закончит говорить
 
   recognizer.interimResults = true; // Какой язык будем распознавать?
@@ -7069,6 +7446,501 @@ const replaceAt = (text, index, replacement) => {
 
 /***/ }),
 
+/***/ "./src/js/services/voiceQuestion.js":
+/*!******************************************!*\
+  !*** ./src/js/services/voiceQuestion.js ***!
+  \******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* WEBPACK VAR INJECTION */(function(global) {// import { stopVoiseLisenerAll,stopVoiseSpeecAll } from "./LitlModules";
+// import elemScroll from "./elemScroll";
+let mySound;
+
+const voiceQuestion = (key, selLocal, viosPath, openAll, p) => {
+  let audio_butto = document.getElementById('voise_aa' + key),
+      curtiem;
+  mySound && pauseVid(mySound);
+  mySound = new Audio(viosPath); // console.log(audio_butto);
+
+  const recognizer = global.recog; // console.log(mySound);
+  // console.log(key);
+  // console.log('.progress__bar'+key);
+  // console.log(selLocal);
+  // console.log(viosPath);
+  // console.log(openAll);
+  // console.log(p);
+  // document.getElementsByClassName('progress__bar'+key)[0].addEventListener('click', setProgress);
+
+  function setProgress(e) {
+    const width = this.clientWidth,
+          clickX = e.offsetX,
+          duration = mySound.duration;
+    curtiem = clickX / width * duration;
+    mySound.currentTime = clickX / width * duration;
+  }
+
+  mySound.ontimeupdate = function (e) {
+    myFunction(e);
+  };
+
+  function myFunction(e) {
+    // console.log(e);
+    if (!document.querySelector('.progress__current' + key)) return;
+    const {
+      duration,
+      currentTime
+    } = e.srcElement,
+          progressPercent = currentTime / duration * 100;
+    document.querySelector('.progress__current' + key).style.width = `${progressPercent}%`;
+  }
+
+  function playVid(track, audio_button) {
+    //  console.log(audio_button);
+    // console.log(track.readyState);
+    // recognizer.stop();
+    track.play();
+
+    track.onplay = function () {
+      // alert("The video has started to play");
+      audio_button.classList.remove('audio_play');
+      audio_button.classList.add('audio_pause');
+    };
+
+    track.onpause = function () {
+      curtiem = track.currentTime;
+    };
+
+    track.onended = function () {
+      // console.log("The audio has ended function axmedet");
+      audio_button.classList.remove('audio_pause');
+      audio_button.classList.add('audio_play');
+      track.currentTime, curtiem = 0;
+      let NoneStopMode = document.querySelector('#non_stop_mode_icon').classList.contains('icon-material_tw_NonStop');
+
+      if (NoneStopMode) {// recognizer.stop();
+        // let time = setTimeout(() => {
+        //   // startVoise();
+        //   clearTimeout(time);
+        // }, 900);
+      }
+    };
+
+    track.ontimeupdate = function (e) {
+      myFunction(e);
+    }; // function myFunction(e) {
+    //   // console.log(e);
+    //   if(!document.querySelector(progress__current)) return
+    //     const { duration, currentTime } = e.srcElement;
+    //     const progressPercent = (currentTime / duration) * 100;
+    //     document.querySelector(progress__current).style.width = `${progressPercent}%`;
+    // }
+
+  }
+
+  function pauseVid(track, audio_button) {
+    track.pause();
+    document.querySelectorAll('.audioTag').forEach(item => {
+      if (item.classList.contains('audio_pause')) {
+        item.classList.remove('audio_pause');
+        item.classList.add('audio_play');
+      }
+    });
+    document.getElementById('voise_aa' + key).classList.remove('audio_pause');
+    document.getElementById('voise_aa' + key).classList.add('audio_play'); // console.log('вызвался');
+  } // if(global.appleMode) {
+  //   console.log('lol');
+  // } else {
+  // }
+  // setListeerBtnPlay();
+  // if (!openAll) {
+  //   let btnVoiseMute = document.querySelector('#voise_mudte_icon').classList.contains('icon-material_li_mute');
+  //   if(!btnVoiseMute) {
+  //     recognizer.stop();
+  //     playVid(mySound);
+  //   }
+  //   elemScroll(selLocal);
+  // }
+  ///////////////////////////////////////////////////////
+  //   async function waitForElement() {
+  //   while (true) {
+  //     // console.log('llll');
+  //     const element = document.getElementById('voise_aa'+key);
+  //     // console.log('#voise_aa'+key);
+  //     // console.log(seler+'question'+counter);
+  //     // console.log(element);
+  //     if (element) {
+  //       console.log('Элемент найден', element);
+  //       // Далее можно выполнить действия с найденным элементом
+  //       return element;
+  //     }
+  //     await new Promise(resolve => setTimeout(resolve, 1000)); // Интервал проверки, в миллисекундах
+  //   }
+  // }
+  // async function main() {
+  //   var element = await waitForElement();
+  //   console.log('Продолжение выполнения кода', element);
+  //   let audio_butto = document.getElementById('voise_aa'+key);
+  //   // Дальнейшие действия с найденным элементом
+  //   // return true;
+  //   // setListeerBtnPlay(audio_butto);
+  //   // if (!openAll) {
+  //   //   let btnVoiseMute = document.querySelector('#voise_mudte_icon').classList.contains('icon-material_li_mute');
+  //   //   if(!btnVoiseMute) {
+  //   //     recognizer.stop();
+  //   //     playVid(mySound);
+  //   //   }
+  //   //   elemScroll(selLocal);
+  //   // }
+  // }
+  // let key = counter;
+  // main();
+
+
+  function setListeerBtnPlay() {
+    const audio_button = document.getElementById('voise_aa' + key); // console.log(key);
+
+    if (!openAll) {
+      let btnVoiseMute = document.querySelector('#voise_mudte_icon').classList.contains('icon-material_li_mute');
+
+      if (!btnVoiseMute) {
+        recognizer.stop(); //     playVid(mySound);
+
+        mySound && pauseVid(mySound);
+        mySound = new Audio(viosPath);
+        playVid(mySound, audio_button);
+      }
+    }
+
+    audio_button.addEventListener('click', e => {
+      e.preventDefault();
+
+      if (audio_button.classList.contains('audio_play')) {
+        // mySound && mySound.pause();
+        mySound && pauseVid(mySound);
+        mySound = new Audio(viosPath);
+
+        if (curtiem) {
+          mySound.currentTime = curtiem;
+          curtiem = null;
+        }
+
+        playVid(mySound, audio_button);
+      } else {
+        pauseVid(mySound, audio_button);
+      }
+    });
+  }
+
+  document.getElementsByClassName('progress__bar' + key)[0].addEventListener('click', setProgress); // console.log(document.getElementsByClassName('progress__bar'+key)[0]);
+  // console.log('progress__bar'+key);
+
+  setListeerBtnPlay();
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (voiceQuestion);
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./src/js/services/whereStCicle.js":
+/*!*****************************************!*\
+  !*** ./src/js/services/whereStCicle.js ***!
+  \*****************************************/
+/*! exports provided: pcsicle, mobailCle, CountElementIsDOM */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "pcsicle", function() { return pcsicle; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mobailCle", function() { return mobailCle; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CountElementIsDOM", function() { return CountElementIsDOM; });
+/* harmony import */ var buzz__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! buzz */ "./node_modules/buzz/dist/buzz.js");
+/* harmony import */ var buzz__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(buzz__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _quetionAdd__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./quetionAdd */ "./src/js/services/quetionAdd.js");
+/* harmony import */ var _LitlModules__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./LitlModules */ "./src/js/services/LitlModules.js");
+
+
+
+
+const pcsicle = (numberQuestion, index) => {
+  console.log('вызов pcsicle');
+  let count = index;
+
+  for (count; count <= numberQuestion; count++) {
+    count === numberQuestion ? Object(_quetionAdd__WEBPACK_IMPORTED_MODULE_1__["default"])(false, false, false, false) : Object(_quetionAdd__WEBPACK_IMPORTED_MODULE_1__["default"])(false, false, false, true);
+  }
+
+  count = null;
+};
+
+const mobailCle = (StartIndex, numberQuestion, allDowen = false) => {
+  let count = 0,
+      lengthIteration = numberQuestion <= 20 ? numberQuestion : 20,
+      element = document.querySelector('.modals_forms'),
+      selectorList = numberQuestion,
+      index = 0;
+  document.body.classList.add('overflowhidden');
+  element.classList.add('showModal');
+  console.log('count ' + count);
+  console.log('lengthIteration ' + lengthIteration);
+  console.log('selectorList ' + selectorList);
+  console.log('StartIndex ' + StartIndex);
+  console.log('numberQuestion ' + numberQuestion);
+  chicle();
+
+  function chicle() {
+    console.log('вызов chicle');
+    console.log(`${index} < ${lengthIteration}`);
+
+    for (index; index < lengthIteration; index++) {
+      count++; // count == selectorList?
+      // setTimeout(() => {
+      //   quetionAdd(false,false,false,false); //
+      //   console.log('true +');
+      // }, 500)
+      // :
+      // console.log('false -');
+      // setTimeout(() => {
+      //   quetionAdd(false,false,false,true);
+      // }, 500)
+
+      if (count == selectorList) {
+        setTimeout(() => {
+          Object(_quetionAdd__WEBPACK_IMPORTED_MODULE_1__["default"])(false, false, false, false); //
+
+          console.log('true +');
+        }, 500);
+        console.log('end in cicle');
+
+        if (allDowen) {
+          const elementList = document.querySelector('.gp_segment'),
+                iconMaterialOpenAll = document.querySelector('.icon-material_gp');
+          iconMaterialOpenAll.parentElement.setAttribute('data-tooltip', 'Прокрутить вниз');
+          iconMaterialOpenAll.classList.add('icon-material_scrollDown'); // iconMaterialOpenAll.parentElement.dataset =
+
+          elementList.addEventListener('click', _LitlModules__WEBPACK_IMPORTED_MODULE_2__["scrollDown"]);
+        }
+
+        document.body.classList.remove('overflowhidden');
+        element.classList.remove('showModal');
+        count = 0;
+        return;
+      } else {
+        setTimeout(() => {
+          Object(_quetionAdd__WEBPACK_IMPORTED_MODULE_1__["default"])(false, false, false, true);
+        }, 500);
+      }
+    }
+
+    if (count >= selectorList) {
+      console.log('цыкл разрыв');
+      count = 0;
+      index = 0;
+      return;
+    } else {
+      index = 0;
+      console.log('цыкл не разрыв');
+      let time3 = setTimeout(() => {
+        chicle();
+        clearTimeout(time3);
+      }, 2500);
+    }
+  }
+};
+
+const CountElementIsDOM = () => {
+  return document.querySelectorAll('.tinRightIn').length || 0;
+};
+
+ // const mobailCle = (StartIndex,numberQuestion) => {
+//   let count = 0,
+//   lengthIteration = StartIndex <= 20? StartIndex :20,
+//   element = document.querySelector('.modals_forms'),
+//   selectorList = numberQuestion,
+//   index = 0;
+//   // document.body.classList.add('overflowhidden')
+//   // element.classList.add('showModal');
+//   console.log('count '+count);
+//   // console.log('lengthIteration '+lengthIteration);
+//   // console.log('selectorList '+selectorList);
+//   // console.log('index '+index);
+//   // console.log('StartIndex ' +StartIndex);
+//   chicle();
+//   function chicle() {
+//     console.log('вызов chicle');
+//     console.log(`${index} < ${lengthIteration}`);
+//     // console.log(lengthIteration+' '+selectorListQ); если длина меньше 20 вопросов нужно цыкл запстить на мых обороткх
+//       if (lengthIteration >= StartIndex) {
+//           lengthIteration = StartIndex;
+//       }
+//       count == selectorList?
+//       setTimeout(() => {
+//         quetionAdd(false,false,false,false); //
+//       }, 500)
+//       :
+//       setTimeout(() => {
+//         quetionAdd(false,false,false,true);
+//       }, 500)
+//       count++;
+//       if(count == selectorList ){
+//         // element.classList.remove('showModal');
+//         // document.body.classList.remove('overflowhidden');
+//         // p = 0;
+//         count = 0;
+//         return;
+//     }
+//     for ( index ; index < lengthIteration; index++) {
+//         // p++;
+//         count++;
+//       // p == selectorList?
+//       count == selectorList?
+//       setTimeout(() => {
+//         quetionAdd(false,false,false,false); //
+//       }, 500)
+//       :
+//       setTimeout(() => {
+//         quetionAdd(false,false,false,true);
+//       }, 500)
+//       // if(p == selectorListQ){
+//       //   return console.log('все ребята!!!');
+//       // }
+//       // if(p == selectorList ){
+//       if(count == selectorList ){
+//           // element.classList.remove('showModal');
+//           // document.body.classList.remove('overflowhidden');
+//           // p = 0;
+//           count = 0;
+//           return;
+//       }
+//     }
+//     // if(p >= selectorList) {
+//     if(count >= selectorList) {
+//       // console.log('цыкл разрыв');
+//       // console.log(p);
+//       // element.classList.remove('showModal');
+//       // document.body.classList.remove('overflowhidden');
+//       // console.log(p);
+//       // console.log('все ребята!!!');
+//       // p = 0;
+//       count = 0;
+//       index = 0;
+//       return;
+//     } else {
+//       index = 0;
+//       //   console.log('цыкл не разрыв');
+//       let time3 = setTimeout(() => {
+//         chicle();
+//         clearTimeout(time3);
+//       }, 2500);
+//     }
+//   }
+// }
+
+/***/ }),
+
+/***/ "./src/js/services/whereSteyFunc.js":
+/*!******************************************!*\
+  !*** ./src/js/services/whereSteyFunc.js ***!
+  \******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! core-js/modules/es.string.replace */ "./node_modules/core-js/modules/es.string.replace.js");
+/* harmony import */ var core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(core_js_modules_es_string_replace__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _quetionAdd__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./quetionAdd */ "./src/js/services/quetionAdd.js");
+/* harmony import */ var _LitlModules__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./LitlModules */ "./src/js/services/LitlModules.js");
+/* harmony import */ var _changeLevel__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./changeLevel */ "./src/js/services/changeLevel.js");
+/* harmony import */ var _whereStCicle__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./whereStCicle */ "./src/js/services/whereStCicle.js");
+
+
+
+
+
+let clx = 0;
+
+const whereSteyFunc = (e, selectorListQ, p) => {
+  // try {
+  e.preventDefault();
+  const sel = localStorage.getItem('WhereStayUser');
+  console.log(sel);
+
+  if (!sel) {
+    //сделать уведомления с надписью "я не знаю где ты остановился"
+    return Object(_LitlModules__WEBPACK_IMPORTED_MODULE_2__["openTextUserError"])('notInfoWheyStay', 'я не знаю где ты остановился');
+  } // если вопрос уже существует просто долистаем до нее
+
+
+  const selen = document.querySelector('.' + sel);
+
+  if (selen) {
+    return selen.scrollIntoView({
+      block: 'start',
+      behavior: 'smooth'
+    });
+  } // if (sel) {
+
+
+  const selectorQuestionLevel = sel.replace(/(question)(\d)+/, ''); // узнаю к какой группе вопрос принадлежит
+
+  const numberQuestion = sel.replace(/(tick|cross|heart|flower)(question)/, '') - 1,
+        body = document.body,
+        html = document.documentElement,
+        width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth); // номер вопроса
+
+  let selectorQuestionopen;
+  console.log(selectorQuestionLevel); // существуют ли вопросы
+
+  const selectorQues = document.querySelector(`.wrapper`); // есть? да значит смотрим что вопросы с какой группы сущесвтуют : вопроов нету
+
+  selectorQues ? selectorQuestionopen = selectorQues.classList[1].replace(/(question)(\d)+/, '') : selectorQuestionopen = null; // с какого вопроса начать
+
+  let index = document.querySelectorAll('.tinRightIn').length || 0; // if(selectorQuestionopen === selectorQuestionLevel){
+  //   console.log('нажимать на изменения урвоня нет смысла!');
+  // }
+  // console.log(`${selectorQuestionopen} !== ${selectorQuestionLevel} || !${selectorQuestionopen}`);
+
+  if (selectorQuestionopen !== selectorQuestionLevel || !selectorQuestionopen) {
+    // console.log('переклюать нужно для мобилок iphone!');
+    //    window.quetiAddn = true;
+    Object(_changeLevel__WEBPACK_IMPORTED_MODULE_3__["default"])(document.querySelector('.' + selectorQuestionLevel), selectorListQ, document.querySelectorAll('.button'));
+
+    if (global.mobaleMOde && width <= 775) {
+      if (numberQuestion === 0) return; // если нужно запустить первый ворос то он и так сгенерируется
+
+      let timeset = setTimeout(() => {
+        index = Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_4__["CountElementIsDOM"])(); // index = document.querySelectorAll('.tinRightIn').length||0;
+
+        Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_4__["mobailCle"])(index, numberQuestion);
+        console.log('Цыкл для mobail!');
+        clearTimeout(timeset);
+      }, 800);
+    } else {
+      let timeset = setTimeout(() => {
+        index = Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_4__["CountElementIsDOM"])();
+        Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_4__["pcsicle"])(numberQuestion, index);
+        clearTimeout(timeset);
+      }, 800);
+      console.log('Цыкл для PC!');
+    }
+  } else {
+    console.log('переключать не нужно '); //  index = document.querySelectorAll('.tinRightIn').length-1;
+
+    index = Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_4__["CountElementIsDOM"])();
+    global.mobaleMOde && width <= 775 ? Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_4__["mobailCle"])(numberQuestion, index, p) : Object(_whereStCicle__WEBPACK_IMPORTED_MODULE_4__["pcsicle"])(numberQuestion, index, p);
+  } //  } catch (error) {console.error(error); }
+
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (whereSteyFunc);
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
 /***/ "./src/js/services/widjetCircolLev.js":
 /*!********************************************!*\
   !*** ./src/js/services/widjetCircolLev.js ***!
@@ -7081,17 +7953,21 @@ __webpack_require__.r(__webpack_exports__);
 // import dbArr from '../db/dbArr.json'
 let selector = null;
 const obj = {
-  'tickquestion': 0,
-  'crossquestion': 0,
-  'heartquestion': 0,
-  'flowerquestion': 0
+  tickquestion: 0,
+  crossquestion: 0,
+  heartquestion: 0,
+  flowerquestion: 0
 };
 
-const widjetCircolLev = sel => {
+const widjetCircolLev = (sel, p = false) => {
   // const btns = document.querySelectorAll('.startPage')
   if (sel) {
     selector = sel;
-  } //получить все значений нужной мне колонки и сделать подсчет строк 
+  }
+
+  if (sel === null) {
+    console.log('sel null === !');
+  } //получить все значений нужной мне колонки и сделать подсчет строк
 
 
   let db = window.dbasce; // console.log(db);
@@ -7125,9 +8001,16 @@ const widjetCircolLev = sel => {
     portDB('flowerquestion', true);
   }
 
+  if (p) {
+    portDB('tickquestion', true);
+    portDB('crossquestion', true);
+    portDB('heartquestion', true);
+    portDB('flowerquestion', true);
+  }
+
   function portDB(params, start = false) {
     // console.log(params);
-    let transaction = db.transaction([params], "readonly");
+    let transaction = db.transaction([params], 'readonly');
     let store = transaction.objectStore(params);
     let p = store.getAll();
 
@@ -7141,6 +8024,7 @@ const widjetCircolLev = sel => {
       }
 
       name();
+      db = null;
       transaction = null;
       p = null;
       store = null;
@@ -7180,7 +8064,7 @@ const widjetCircolLev = sel => {
           break;
       }
 
-      let counterProcent = Math.round(obj[item.classList[2] + "question"] / selectbivider * 100);
+      let counterProcent = Math.round(obj[item.classList[2] + 'question'] / selectbivider * 100);
       item.textContent = counterProcent + '%';
       item.style.setProperty('--pie-p', counterProcent + '%');
       localSel = null;
