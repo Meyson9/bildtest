@@ -7538,11 +7538,17 @@ const mobailCle = (startIndex, numberQuestion, allDowen = false) => {
       lengthIteration = numberQuestion <= 20 ? numberQuestion : 20,
       element = document.querySelector('.modals_forms'),
       selectorList = numberQuestion,
-      index = 0;
+      index = 0,
+      voisMute = false;
   const btnVois = document.querySelector('#voise_mudte_icon');
+  btnVois.classList.contains('icon-material_li_mute') ? voisMute = true : voisMute = false;
+
+  if (!voisMute) {
+    btnVois.classList.add('icon-material_li_mute');
+  }
+
   document.body.classList.add('overflowhidden');
-  element.classList.add('showModal');
-  btnVois.classList.add('icon-material_li_mute'); // console.log(startIndex + ' > ' + (numberQuestion + startIndex));
+  element.classList.add('showModal'); // console.log(startIndex + ' > ' + (numberQuestion + startIndex));
 
   const modeBtnOPenAll = () => {
     const elementList = document.querySelector('.gp_segment'),
@@ -7578,7 +7584,10 @@ const mobailCle = (startIndex, numberQuestion, allDowen = false) => {
         setTimeout(() => {
           Object(_quetionAdd__WEBPACK_IMPORTED_MODULE_1__["default"])(false, false, false, false); //
 
-          btnVois.classList.remove('icon-material_li_mute');
+          if (!voisMute) {
+            btnVois.classList.remove('icon-material_li_mute');
+          }
+
           console.log('true +');
         }, 500);
         console.log('end in cicle');
